@@ -76,7 +76,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: uberjar
-          path: health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar
+          path: health-record-app/target
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
