@@ -54,8 +54,8 @@ jobs:
             ~/.gitlibs
             ~/.deps.clj
           # List all files containing dependencies:
-          key: cljdeps-${{ hashFiles('deps.edn') }}
+          # key: cljdeps-${{ hashFiles('deps.edn') }}
           # key: cljdeps-${{ hashFiles('deps.edn', 'bb.edn') }}
-          # key: cljdeps-${{ hashFiles('project.clj') }}
+          key: cljdeps-${{ hashFiles('health-record-app/project.clj') }}
           # key: cljdeps-${{ hashFiles('build.boot') }}
           restore-keys: cljdeps-
