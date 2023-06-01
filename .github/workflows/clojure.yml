@@ -52,4 +52,4 @@ jobs:
           restore-keys: cljdeps-
 
        - name: Get leiningen version
-        run: lein -v
+         run: lein -v
