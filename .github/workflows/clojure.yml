@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: health-record-api
+  IMAGE_NAME: iku000888/health-record-api
 
 
 jobs:
