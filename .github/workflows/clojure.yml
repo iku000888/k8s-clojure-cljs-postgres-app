@@ -51,5 +51,5 @@ jobs:
           # key: cljdeps-${{ hashFiles('build.boot') }}
           restore-keys: cljdeps-
 
-       - name: Get leiningen version
-         run: lein -v
+      - name: Get leiningen version
+        run: lein -v
