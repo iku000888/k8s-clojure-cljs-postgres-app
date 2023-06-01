@@ -11,7 +11,7 @@ env:
 
 jobs:
 
-  ubarjar:
+  uberjar:
 
     runs-on: ubuntu-latest
 
