@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-record-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: health-record-api
+  template:
+    metadata:
+      labels:
+        app: health-record-api
+    spec:
+      containers:
+      - name: backend
+        image: iku000888/health-record-api:latest
+        ports:
+        - containerPort: 8080
