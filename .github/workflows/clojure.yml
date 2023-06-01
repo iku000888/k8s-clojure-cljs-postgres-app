@@ -13,17 +13,11 @@ jobs:
 
   uberjar:
 
-    runs-on: ubuntu-latest
+    runs-on: openjdk:11-jre-slim
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Prepare java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
 
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@11.0
