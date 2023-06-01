@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ghcr.io/iku000888/health-record-api:main
+        image: ghcr.io/iku000888/health-record-api:0.0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
