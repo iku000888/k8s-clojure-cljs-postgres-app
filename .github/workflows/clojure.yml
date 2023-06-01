@@ -43,11 +43,6 @@ jobs:
         working-directory: ./health-record-app
         run: lein uberjar
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ubarjar
-          path: health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar
-
       # Optional step:
       - name: Cache clojure dependencies
         uses: actions/cache@v3
@@ -84,8 +79,9 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        working-directory: ./health-record-app
         with:
-          context: ./health-record-app
+          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
