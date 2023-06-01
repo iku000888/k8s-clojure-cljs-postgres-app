@@ -1,0 +1,6 @@
+{:components
+ {:handler {:start (health-record-app.server/yada-handler {})}
+  :server {:start (health-record-app.server/aleph-server
+                   {:port 8080
+                    :handler (clip/ref :handler)})
+           :stop (health-record-app.server/aleph-server.stop this)}}}
