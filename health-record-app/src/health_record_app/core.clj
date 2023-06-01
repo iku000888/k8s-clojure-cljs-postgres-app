@@ -1,6 +1,8 @@
 (ns health-record-app.core
+  (:gen-class)
   (:require [aleph.http :as http]
             [yada.yada :as yada]
+            [juxt.clip.core :as clip]
             [juxt.clip.edn :as clip.edn]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
@@ -12,7 +14,14 @@
     (slurp
      (io/resource "config.edn")))))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(def system nil)
+
+(defn -main
+  [& _]
+  (let [system-config (config)
+        system (clip/start system-config)]
+    (alter-var-root #'system (constantly system))
+    (.addShutdownHook
+     (Runtime/getRuntime)
+     (Thread. #(clip/stop system-config system))))
+  @(promise))

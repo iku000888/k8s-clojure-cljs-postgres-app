@@ -13,4 +13,6 @@
                  [aero "1.1.6"]]
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]]
                    :source-paths ["dev/src"]
-                   :repl-options {:init-ns dev}}})
+                   :repl-options {:init-ns dev}}
+             :uberjar {:main health-record-app.core
+                       :aot [health-record-app.core]}})
