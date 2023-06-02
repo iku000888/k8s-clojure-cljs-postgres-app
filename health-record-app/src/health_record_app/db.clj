@@ -2,9 +2,12 @@
   (:require [next.jdbc :as jdbc]
             [next.jdbc.sql :as sql]
             [next.jdbc.connection :as connection]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [next.jdbc.date-time])
   (:import (com.zaxxer.hikari HikariDataSource)))
 
+;; Cutting a little bit of slack here -
+;; IRL I would set up full fledged migration with migratus or ragtime.
 (defn setup-schema [db]
   (with-open [c (jdbc/get-connection db)]
     (when-not (seq (sql/query c
@@ -28,6 +31,7 @@
 (defn pool [config]
   (let [pool (connection/->pool com.zaxxer.hikari.HikariDataSource
                                 {:jdbcUrl (connection/jdbc-url config)})]
+    (next.jdbc.date-time/read-as-local)
     (setup-schema pool)
     pool))
 
