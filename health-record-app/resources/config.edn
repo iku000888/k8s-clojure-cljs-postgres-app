@@ -1,13 +1,21 @@
 {:components
- {:db {:start (health-record-app.db/pool {:host "192.168.49.2"
+ {:handler/patient.delete {:start (health-record-app.handler/patient.delete (clip/ref :db))}
+  :handler/patients {:start (health-record-app.handler/patients (clip/ref :db))}
+  :db {:start (health-record-app.db/pool {:host "192.168.49.2"
                                           :port 32037
                                           :dbtype "postgres"
                                           :dbname "postgres"
                                           :user "your_username"
                                           :password "your_password"})
        :stop (health-record-app.db/pool.stop this)}
-  :handler {:start (health-record-app.server/yada-handler {})}
   :server {:start (health-record-app.server/aleph-server
                    {:port 8080
-                    :handler (clip/ref :handler)})
+                    :resources {:patients {:methods
+                                           {:get
+                                            {:produces "application/json"
+                                             :response (clip/ref :handler/patients)}}}
+                                :patient {:methods
+                                          {:delete
+                                           {:produces "application/json"
+                                            :response (clip/ref :handler/patient.delete)}}}}})
            :stop (health-record-app.server/aleph-server.stop this)}}}
