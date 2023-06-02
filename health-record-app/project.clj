@@ -10,7 +10,12 @@
                  [aleph "0.6.2"]
 
                  [juxt/clip "0.28.0"]
-                 [aero "1.1.6"]]
+                 [aero "1.1.6"]
+
+
+                 [com.github.seancorfield/next.jdbc "1.3.874"]
+                 [com.zaxxer/HikariCP "3.3.1"]
+                 [org.postgresql/postgresql "42.2.10"]]
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]]
                    :source-paths ["dev/src"]
                    :repl-options {:init-ns dev}}

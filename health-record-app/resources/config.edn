@@ -1,5 +1,12 @@
 {:components
- {:handler {:start (health-record-app.server/yada-handler {})}
+ {:db {:start (health-record-app.db/pool {:host "192.168.49.2"
+                                          :port 32037
+                                          :dbtype "postgres"
+                                          :dbname "postgres"
+                                          :user "your_username"
+                                          :password "your_password"})
+       :stop (health-record-app.db/pool.stop this)}
+  :handler {:start (health-record-app.server/yada-handler {})}
   :server {:start (health-record-app.server/aleph-server
                    {:port 8080
                     :handler (clip/ref :handler)})

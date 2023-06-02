@@ -1,4 +1,4 @@
-.PHONY: locally-build-images locally-load-images
+.PHONY: locally-build-images locally-load-images postgres-port-forward
 TAG:=0.0.1
 
 health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar:
@@ -9,3 +9,6 @@ locally-build-images: health-record-app/target/health-record-app-0.1.0-SNAPSHOT-
 
 locally-load-images:
 	minikube image load ghcr.io/iku000888/health-record-api:${TAG}
+
+postgres-port-forward:
+	kubectl port-forward service/postgres-service 5432:5432
