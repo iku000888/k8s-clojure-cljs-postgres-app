@@ -3,14 +3,19 @@
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
-  :dependencies [[org.clojure/clojure "1.10.3"]
-                 [yada "1.2.15"]
+  :dependencies [[com.amperity/dialog "2.0.115"]
+                 [org.clojure/clojure "1.10.3"]
+                 [yada "1.2.15" :exclusions [[byte-streams]]]
 
                  ;; https://github.com/juxt/yada/issues/266
+                 #_[aleph "0.4.7-alpha5"]
                  [aleph "0.6.2"]
-
+                 [org.clj-commons/byte-streams "0.3.2"]
+                 #_[manifold "0.1.9-alpha3"]
+                 [manifold "0.4.1"]
                  [juxt/clip "0.28.0"]
                  [aero "1.1.6"]
+
 
 
                  [com.github.seancorfield/next.jdbc "1.3.874"]
