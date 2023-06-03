@@ -5,7 +5,7 @@
             [next.jdbc.date-time]))
 
 (defn patients [conn]
-  (sql/query conn ["select * from patients"]))
+  (sql/query conn ["select * from patients"] {:builder-fn next.jdbc.result-set/as-unqualified-maps}))
 
 (defn add-patient [conn patient]
   (sql/insert! conn :patients patient))
