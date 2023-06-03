@@ -3,50 +3,7 @@
             [bidi.ring]
             [yada.yada :as yada]
             [dialog.logger :as log]))
-(yada.handler/interceptor-chain nil)
-(comment
-  (let [body (:body @((yada.handler/as-handler
-                       ["/"
-                        (yada.yada/resource
-                         {:interceptor-chain [(fn [_] (throw (ex-info "i hate u" {})))]}
-                         )])
-                      {:uri "/"}))
-        buf (byte-array (.remaining body))]
-    (.get body buf)
-    (slurp buf))
 
-  (let [body (:body @((yada.handler/as-handler
-                       ["/"
-                        (yada.yada/resource
-                         {:interceptor-chain
-                          [#_(fn [_] (throw (ex-info "i hate u" {})))]
-                          #_(yada.handler/interceptor-chain nil)
-                          #_(yada.handler/error-interceptor-chain nil)
-                          :error-interceptor-chain
-                          [#_(fn [ctx]
-                               #_(throw (ex-info "i hate u more" {}))
-                               {:body
-                                (yada.body/to-body "goober" String)})]
-                          :methods
-                          {:post
-                           {:produces "application/json"
-                            :consumes #{"application/json"}
-                            :response (juxt.clip.repl/system :handler/patients.add)}
-                           :get
-                           {:produces "application/json"
-                            :response (juxt.clip.repl/system :handler/patients)}}}
-
-                         )])
-                      {:uri "/"
-                       :request-method :get}))
-        buf (byte-array (.remaining body))]
-    (.get body buf)
-    (slurp buf))
-
-
-
-  (:server juxt.clip.repl/system)
-  )
 (defn log-request [ctx]
   (log/info (:uri (:request ctx)) (:request-method (:request ctx)))
   ctx)
