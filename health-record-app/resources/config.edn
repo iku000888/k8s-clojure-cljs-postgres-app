@@ -2,6 +2,7 @@
  {:handler/patient.delete {:start (health-record-app.handler/patient.delete (clip/ref :db))}
   :handler/patients {:start (health-record-app.handler/patients (clip/ref :db))}
   :handler/patients.add {:start (health-record-app.handler/patients.add (clip/ref :db))}
+  :handler/patients.update {:start (health-record-app.handler/patients.update (clip/ref :db))}
   :db {:start (health-record-app.db/pool {:host "192.168.49.2"
                                           :port 32037
                                           :dbtype "postgres"
@@ -20,7 +21,10 @@
                                             {:produces "application/json"
                                              :response (clip/ref :handler/patients)}}}
                                 :patient {:methods
-                                          {:delete
+                                          {:put
+                                           {:produces "application/json"
+                                            :consumes #{"application/json"}
+                                            :response (clip/ref :handler/patients.update)}                                                                :delete
                                            {:produces "application/json"
                                             :response (clip/ref :handler/patient.delete)}}}}})
            :stop (health-record-app.server/aleph-server.stop this)}}}
