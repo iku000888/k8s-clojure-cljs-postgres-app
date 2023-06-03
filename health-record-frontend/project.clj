@@ -5,11 +5,15 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.11.0"]
                  [thheller/shadow-cljs "2.23.3"]
-                 [lilactown/helix "0.1.10"]]
+                 [lilactown/helix "0.1.10"]
+                 [cljs-ajax "0.8.4"]]
   :plugins [[lein-shadow "0.4.1"]]
   :repl-options {:init-ns helix-demo.core}
   :npm-deps [[react "18.2.0"]
-             [react-dom "18.2.0"]]
+             [react-dom "18.2.0"]
+             [smarthr-ui "31.1.0"]
+             [styled-components "5.3.11"]
+             [process "0.11.10"]]
   :shadow-cljs
   {:source-paths ["src"]
    :nrepl        {:port 8777}
