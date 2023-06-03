@@ -1,0 +1,7 @@
+/health-record-frontend/.shadow-cljs/
+/health-record-frontend/node_modules/
+/health-record-frontend/package-lock.json
+/health-record-frontend/target/
+/health-record-frontend/shadow-cljs.edn
+/health-record-frontend/package.json
+/health-record-frontend/public/js/
