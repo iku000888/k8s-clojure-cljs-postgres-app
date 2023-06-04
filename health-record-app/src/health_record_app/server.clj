@@ -17,7 +17,8 @@
    res
    :responses {500 {:produces "application/json"
                     :response {:message "Sorry, very internal error"}}}
-   :access-control {:allow-origin #{"http://localhost:8700"}
+   :access-control {:allow-origin #{(System/getenv "CORS_ALLOW_ORIGIN")
+                                    "http://localhost:8700"}
                     :allow-methods #{:get :put :post :delete}
                     :allow-headers #{"content-type"}}
    :interceptor-chain [log-request

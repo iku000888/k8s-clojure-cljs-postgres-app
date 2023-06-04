@@ -26,7 +26,7 @@ api-port-forward:
 	kubectl port-forward service/api-service 8080:8080
 
 frontend-port-forward:
-	kubectl port-forward service/frontend-service 3000:80
+	kubectl port-forward service/frontend-service 8700:3000
 
 minikube-up:
 	minikube start
