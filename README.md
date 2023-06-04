@@ -5,6 +5,10 @@
 - minikube https://minikube.sigs.k8s.io/docs/start/
 - docker cli
 - login set up to ghcr.io where the built images are hosted
+- (for local dev)
+  - leiningen
+  - npm
+
 
 ## Running@k8s
 
@@ -29,3 +33,17 @@
 
 - cd `health-record-frontend`
 - `lein shadow watch app`
+
+## Testing
+
+### End To End test
+
+### API Integration test
+
+### Unit test
+
+#### API
+
+#### Frontend
+
+### Performance test
