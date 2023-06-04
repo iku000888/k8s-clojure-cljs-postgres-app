@@ -6,16 +6,14 @@
             [juxt.clip.core :as clip]
             [juxt.clip.edn :as clip.edn]
             [clojure.java.io :as io]
-            [clojure.edn :as edn]
             [aero.core :refer [read-config]]))
 
 
 (defn config []
   (log/initialize!)
   (clip.edn/load
-   (edn/read-string
-    (slurp
-     (io/resource "config.edn")))))
+   (read-config
+    (io/resource "config.edn"))))
 
 (def system nil)
 

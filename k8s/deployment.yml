@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: health-record-api
+  name: health-record-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: health-record-api
+      app: health-record-frontend
   template:
     metadata:
       labels:
-        app: health-record-api
+        app: health-record-frontend
     spec:
       containers:
       - name: backend
@@ -41,6 +41,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
+        env:
+          - name: DB_HOST
+            value: postgres
 
 ---
 
@@ -84,4 +87,34 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
+  type: NodePort
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  selector:
+    app: health-record-api
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: NodePort
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: health-record-frontend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 80
   type: NodePort
