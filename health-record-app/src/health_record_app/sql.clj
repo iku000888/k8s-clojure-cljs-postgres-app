@@ -17,12 +17,42 @@
   (sql/delete! conn :patients {:patients/patient_id id}))
 
 (comment
-  (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
-    (add-patient c {:name "Ikuru"
-                    :gender (as-other "Male")
-                    :date_of_birth (java.time.LocalDate/parse "1992-08-23")
-                    :address "Fresno, CA"
-                    :phone_number "650 605 7491"}))
+  (doseq [i (range 100)]
+    (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
+      (add-patient c {:name (str "person-" i)
+                      :gender (as-other (rand-nth ["Male" "Female"]))
+                      :date_of_birth (java.time.LocalDate/parse
+                                      (format "19%s%s-%s-%s"
+                                              (rand-int 10)
+                                              (rand-int 10)
+                                              (rand-nth ["01"
+                                                         "02"
+                                                         "03"
+                                                         "04"
+                                                         "05"
+                                                         "06"
+                                                         "07"
+                                                         "08"
+                                                         "09"
+                                                         "10"
+                                                         "11"
+                                                         "12"])
+                                              (rand-nth ["01"
+                                                         "02"
+                                                         "03"
+                                                         "04"
+                                                         "05"
+                                                         "06"
+                                                         "07"
+                                                         "08"
+                                                         "09"
+                                                         "10"
+                                                         "11"
+                                                         "12"])))
+                      :address (rand-nth ["Fresno, CA"
+                                          "Los Angeles, CA"
+                                          "San Jose, CA"])
+                      :phone_number "650 605 7491"})))
   (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
     (patients c))
   (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]

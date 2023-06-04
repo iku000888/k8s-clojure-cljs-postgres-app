@@ -12,10 +12,11 @@
   (log/info (:status (:response ctx)) (:uri (:request ctx)) (:request-method (:request ctx)))
   ctx)
 
-
 (defn dope-resource [res]
   (assoc
    res
+   :responses {500 {:produces "application/json"
+                    :response {:message "Sorry, very internal error"}}}
    :access-control {:allow-origin #{"http://localhost:8700"}
                     :allow-methods #{:get :put :post :delete}
                     :allow-headers #{"content-type"}}
@@ -36,14 +37,15 @@
                        yada.interceptors/create-response
                        log-response
                        yada.interceptors/return]
-   :error-interceptor-chain [(fn [ctx]
+   :error-interceptor-chain [yada.security/access-control-headers
+                             (fn [ctx]
                                (log/error (:error ctx)
-                                          "Uncaugh error")
-                               {:status 500
-                                :body
-                                (yada.body/to-body
-                                 "Internal Error"
-                                 String)})]))
+                                          ctx
+                                          "Uncaught error")
+                               (update ctx :response assoc :body {:message "Internal Error"}))
+
+                             yada.interceptors/create-response
+                             yada.interceptors/return]))
 
 (defn aleph-server [{:keys [resources
                             port]}]

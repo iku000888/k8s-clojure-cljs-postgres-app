@@ -1,11 +1,26 @@
 (ns health-record-frontend.core
-  (:require [ajax.core :refer [GET PUT POST]]
+  (:require [ajax.core :refer [GET PUT POST DELETE
+                               default-interceptors to-interceptor]]
+            [clojure.string :as str]
             [helix.core :refer [defnc $]]
             [helix.hooks :as hooks]
             [helix.dom :as d]
             [goog.i18n.DateTimeFormat :as gdtf]
             ["react-dom/client" :as rdom]
             ["smarthr-ui" :as shr]))
+
+(defn delete-is-empty [{:keys [method] :as request}]
+  (if (= method "DELETE")
+    (reduced (assoc request :body nil))
+    request))
+
+(def app-engine-delete-interceptor
+  (to-interceptor {:name "Google App Engine Delete Rule"
+                   :request delete-is-empty}))
+
+;;; Since this rule uses `reduced`, it is important that it is
+;;; positioned at the end of the list, hence we use `concat` here
+(swap! default-interceptors concat [app-engine-delete-interceptor])
 
 (defn format-date [date]
   (let [year (.getFullYear date)
@@ -17,7 +32,9 @@
 
 (defn use-patients []
   (let [[patients set-patients] (hooks/use-state {})
-        [selected-patient-ids set-selected-patient-ids] (hooks/use-state #{})]
+        [selected-patient-ids set-selected-patient-ids] (hooks/use-state #{})
+        [request-error set-request-error] (hooks/use-state nil)
+        [request-success set-request-success] (hooks/use-state nil)]
     (hooks/use-effect
      []
      (GET "http://localhost:8080/api/patients/"
@@ -27,8 +44,12 @@
                                         (map (fn [p]
                                                [(:patient_id p)
                                                 p]))
-                                        (into {})))}))
-
+                                        (into {})))
+           :error-handler #(set-request-error %)}))
+    (hooks/use-effect
+     [request-success]
+     (when request-success
+       (js/setTimeout (fn [] (set-request-success nil)) 6000)))
     {:patients patients
      :add-patient (fn [patient]
                     (POST "http://localhost:8080/api/patients/"
@@ -36,7 +57,9 @@
                            :format :json
                            :params patient
                            :keywords? true
+                           :error-handler #(set-request-error %)
                            :handler (fn [response]
+                                      (set-request-success "Successfully added patient")
                                       (set-patients
                                        #(assoc %
                                                (:patient_id response)
@@ -47,36 +70,45 @@
                              :format :json
                              :params patient
                              :keywords? true
+                             :error-handler #(set-request-error %)
                              :handler (fn [_response]
+                                        (set-request-success "Successfully updated patient")
                                         (set-patients
                                          #(assoc % id patient)))}))
+     :delete-patient (fn [id]
+                       (DELETE (str "http://localhost:8080/api/patients/" id)
+                               {:response-format :json
+                                :keywords? true
+                                :body nil
+                                :error-handler #(set-request-error %)
+                                :handler (fn [_response]
+                                           (set-selected-patient-ids #(disj % id))
+                                           (set-request-success "Successfully deleted patient")
+                                           (set-patients
+                                            #(dissoc % id)))}))
      :selected-patient-ids selected-patient-ids
      :select-patient-id (fn [patient-id]
                           (set-selected-patient-ids
                            #(if (% patient-id)
                               (disj % patient-id)
                               (conj % patient-id))))
-     :toggle-select-all-patient-id (fn []
+     :toggle-select-all-patient-id (fn [filtered-patients]
                                      (set-selected-patient-ids
                                       #(if (empty? %)
-                                         (set (keys patients))
-                                         #{})))}))
+                                         (set (if (seq filtered-patients)
+                                                (keys filtered-patients)
+                                                (keys patients)))
+                                         #{})))
+     :request-success request-success
+     :set-request-success set-request-success
+     :request-error request-error
+     :set-request-error set-request-error}))
 
 (def theme (shr/createTheme))
 
-(defnc greeting
-  "A component which greets a user."
-  [{:keys [name]}]
-  ;; use helix.dom to create DOM elements
-  (d/div {} "Hello, " (d/strong name) "!"))
-
 (defn valid-phone-number? [phone]
-  (when phone
-    (js/console.log
-     (pr-str [phone
-              (re-matches #"\(?([2-9][0-8][0-9])\)?[-. ]?([2-9][0-9]{2})[-. ]?([0-9]{4})"
-                          phone)])))
   (or (empty? phone)
+      ;; just made chat gpt produce something
       (not (empty? (re-matches #"\(?([2-9][0-8][0-9])\)?[-. ]?([2-9][0-9]{2})[-. ]?([0-9]{4})"
                                phone)))))
 
@@ -137,25 +169,74 @@
 
 (defnc shr-table
   [{:keys []}]
-  (let [[selected-patient set-selected-patient] (hooks/use-state nil)
+  (let [[filter-input set-filter-input] (hooks/use-state nil)
+        [selected-patient set-selected-patient] (hooks/use-state nil)
         {:keys [patients selected-patient-ids select-patient-id
                 toggle-select-all-patient-id
                 update-patient
-                add-patient]}
-        (use-patients)]
+                add-patient
+                set-request-error
+                set-request-success
+                delete-patient
+                request-error
+                request-success]}
+        (use-patients)
+        filtered-patients (if-not (empty? filter-input)
+                            (->> patients
+                                 (filter (fn [[id p]]
+                                           (let [ps (vals p)]
+                                             (some #(when (and filter-input %)
+                                                      (str/includes?
+                                                       (str/lower-case (str %))
+                                                       (str/lower-case filter-input)))
+                                                   ps))))
+                                 (into {}))
+                            patients)]
     (d/div
-     (pr-str selected-patient)
-     (pr-str shr/Dialog)
-     ($ shr/Table {}
+     ($ shr/Table {:fixedHead true}
         (d/thead
-         ($ shr/BulkActionRow
-            (when (seq selected-patient-ids)
-              ($ shr/Button {:onClick #(set-selected-patient (constantly {}))}
-                 "Delete Selected"))
-            ($ shr/Button {:onClick #(set-selected-patient (constantly {}))}
-               "New Patient"))
+         (cond
+
+           request-error
+           ($ shr/BulkActionRow
+              ($ shr/InformationPanel {:title "Request Failed"
+                                       :decorators #js {:closeButtonLabel (fn [r] "Dismiss")}
+                                       :onClickTrigger (fn []
+                                                         (set-request-error nil))
+                                       :type "error"}
+                 (:message (:response request-error))))
+
+           request-success
+           ($ shr/BulkActionRow
+              ($ shr/InformationPanel {:title "Request Success"
+                                       :decorators #js {:closeButtonLabel (fn [r] "Dismiss")}
+                                       :onClickTrigger (fn []
+                                                         (set-request-success nil))
+                                       :type "success"}
+                 request-success))
+
+           :else
+           ($ shr/BulkActionRow
+              ($ shr/SearchInput {:tooltipMessage "Filter by space delimited Name, Address, Phone number or DOB"
+                                  :onChange #(set-filter-input
+                                              (.-value (.-target %)))})
+              (when (seq selected-patient-ids)
+                ($ shr/Button {:onClick (fn []
+                                          (doseq [sel-id selected-patient-ids]
+                                            (delete-patient sel-id)))}
+                   "Delete Selected"))
+              (when-not (or (seq selected-patient-ids)
+                            (seq filter-input))
+                ($ shr/Button {:onClick #(set-selected-patient (constantly {:name ""
+                                                                            :gender ""
+                                                                            :phone_number ""
+                                                                            :address ""}))}
+                   "New Patient"))))
+
          (d/tr
-          ($ shr/ThCheckbox {:onClick toggle-select-all-patient-id
+          ($ shr/ThCheckbox {:onClick #(toggle-select-all-patient-id
+                                        (when-not(empty? filter-input)
+                                          filtered-patients))
                              :checked (= selected-patient-ids (set (keys patients)))})
           ($ shr/Th "Name")
           ($ shr/Th "Gender")
@@ -164,7 +245,7 @@
           ($ shr/Th "Phone number")
           ($ shr/Th "")))
         (d/tbody
-         (for [[id p] patients]
+         (for [[id p] filtered-patients]
            (d/tr {:key id}
                  ($ shr/TdCheckbox {:onClick #(select-patient-id id)
                                     :checked (some? (selected-patient-ids id))})
@@ -196,7 +277,9 @@
        ($ shr/Button {:variant "primary"}
           "Hello world"))
   #_($ greeting {})
-  ($ shr-table {})
+  ($ shr/Stack
+     ($ shr/AppNavi {:label "Health Tek"})
+     ($ shr-table {}))
   #_($ shr/Table {}
        (d/thead {})
        #_($ shr/EmptyTableBody {}
