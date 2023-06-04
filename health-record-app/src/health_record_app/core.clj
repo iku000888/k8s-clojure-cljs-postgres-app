@@ -9,10 +9,9 @@
             [clojure.edn :as edn]
             [aero.core :refer [read-config]]))
 
-(log/initialize!)
-(log/set-level! :debug)
 
 (defn config []
+  (log/initialize!)
   (clip.edn/load
    (edn/read-string
     (slurp

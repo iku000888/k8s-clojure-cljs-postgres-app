@@ -14,6 +14,29 @@ spec:
     spec:
       containers:
       - name: backend
+        image: ghcr.io/iku000888/health-record-frontend:main
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-record-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: health-record-api
+  template:
+    metadata:
+      labels:
+        app: health-record-api
+    spec:
+      containers:
+      - name: backend
         image: ghcr.io/iku000888/health-record-api:main
         imagePullPolicy: IfNotPresent
         ports:

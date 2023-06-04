@@ -3,8 +3,8 @@
   :handler/patients {:start (health-record-app.handler/patients (clip/ref :db))}
   :handler/patients.add {:start (health-record-app.handler/patients.add (clip/ref :db))}
   :handler/patients.update {:start (health-record-app.handler/patients.update (clip/ref :db))}
-  :db {:start (health-record-app.db/pool {:host "192.168.49.2"
-                                          :port 32037
+  :db {:start (health-record-app.db/pool {:host #or [#env DB_HOST "localhost"]
+                                          :port 5432
                                           :dbtype "postgres"
                                           :dbname "postgres"
                                           :user "your_username"
