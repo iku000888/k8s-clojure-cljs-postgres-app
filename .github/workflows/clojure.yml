@@ -69,9 +69,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: uberjar
+          name: frontend-js
           path: health-record-frontend/public/js/compiled/main.js
-          target/health-record-app-0.1.0-SNAPSHOT-standalone.jar
 
   docker-build:
     runs-on: ubuntu-latest
