@@ -43,6 +43,15 @@ jobs:
         working-directory: ./health-record-app
         run: lein uberjar
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: uberjar
+          path: health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar
+
+      - name: Build frontend
+        working-directory: ./health-record-frontend
+        run: lein shadow release app
+
       # Optional step:
       - name: Cache clojure dependencies
         uses: actions/cache@v3
@@ -57,15 +66,6 @@ jobs:
           key: cljdeps-${{ hashFiles('health-record-app/project.clj') }}
           # key: cljdeps-${{ hashFiles('build.boot') }}
           restore-keys: cljdeps-
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: uberjar
-          path: health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar
-
-      - name: Build frontend
-        working-directory: ./health-record-frontend
-        run: lein shadow build app
 
       - uses: actions/upload-artifact@v3
         with:
