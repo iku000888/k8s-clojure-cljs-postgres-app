@@ -1,1 +1,6 @@
 /* some style */
+
+.smarthr-ui-Dialog-body{
+    margin: 30px;
+    padding: 10px;
+}

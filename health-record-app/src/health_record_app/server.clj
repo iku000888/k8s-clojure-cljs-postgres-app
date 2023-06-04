@@ -16,8 +16,9 @@
 (defn dope-resource [res]
   (assoc
    res
-   :access-control {:allow-origin #{"http://localhost:8700"}}
-   ;;(yada.handler/interceptor-chain nil)
+   :access-control {:allow-origin #{"http://localhost:8700"}
+                    :allow-methods #{:get :put :post :delete}
+                    :allow-headers #{"content-type"}}
    :interceptor-chain [log-request
                        yada.interceptors/method-allowed?
                        yada.swagger-parameters/parse-parameters
