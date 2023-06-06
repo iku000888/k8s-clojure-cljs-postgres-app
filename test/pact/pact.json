@@ -7,8 +7,126 @@
   },
   "interactions": [
     {
-      "description": "a request to say Hello",
-      "type": "Synchronous/HTTP",
+      "description": "Initially empty",
+      "providerStates": [
+        {
+          "name": "No patients exist"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/patients/"
+      },
+      "response": {
+        "status": 200,
+        "body": []
+      }
+    },
+    {
+      "description": "Add a patient",
+      "request": {
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "path": "/api/patients/",
+        "body": {
+          "patient_id": 999,
+          "name": "Jimmy Jon",
+          "phone_number": "333 444 9999",
+          "address": "123 Block B, CA",
+          "date_of_birth": "2000-03-28",
+          "gender": "Female"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "patient_id": 999,
+          "name": "Jimmy Jon",
+          "phone_number": "333 444 9999",
+          "address": "123 Block B, CA",
+          "date_of_birth": "2000-03-28",
+          "gender": "Female"
+        }
+      }
+    },
+    {
+      "description": "Patient Added",
+      "request": {
+        "method": "GET",
+        "path": "/api/patients/"
+      },
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "patient_id": 999,
+            "name": "Jimmy Jon",
+            "gender": "Female",
+            "date_of_birth": "2000-03-28",
+            "address": "123 Block B, CA",
+            "phone_number": "333 444 9999"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Update a patient",
+      "request": {
+        "method": "PUT",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "path": "/api/patients/999",
+        "body": {
+          "patient_id": 999,
+          "name": "Limmy Lon",
+          "phone_number": "333 444 9998",
+          "address": "123 Block C, CA",
+          "date_of_birth": "2001-03-28",
+          "gender": "Male"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+        }
+      }
+    },
+    {
+      "description": "Patient Updated",
+      "request": {
+        "method": "GET",
+        "path": "/api/patients/"
+      },
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "name": "Limmy Lon",
+            "gender": "Male",
+            "date_of_birth": "2001-03-28",
+            "address": "123 Block C, CA",
+            "phone_number": "333 444 9998"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Delete a patient",
+      "request": {
+        "method": "DELETE",
+        "path": "/api/patients/999"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+        }
+      }
+    },
+    {
+      "description": "Patient deleted",
       "request": {
         "method": "GET",
         "path": "/api/patients/"

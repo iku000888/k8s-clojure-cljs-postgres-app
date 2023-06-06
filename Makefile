@@ -1,4 +1,4 @@
-.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e
+.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e test-pact pact-mock
 TAG:=0.0.1
 
 health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar:
@@ -36,3 +36,9 @@ test-e2e:
 
 test-pact:
 	cd test/pact/ && make pact-verify
+
+test-pact-without-setup:
+	cd test/pact/ && make pact-verify-without-setup
+
+pact-mock:
+	cd test/pact/ && make pact-mock
