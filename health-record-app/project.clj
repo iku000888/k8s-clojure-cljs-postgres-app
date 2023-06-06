@@ -21,7 +21,10 @@
                  [com.github.seancorfield/next.jdbc "1.3.874"]
                  [com.zaxxer/HikariCP "3.3.1"]
                  [org.postgresql/postgresql "42.2.10"]]
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]
+                                  [au.com.dius/pact-jvm-consumer-junit "4.0.10"]
+                                  [au.com.dius/pact-jvm-model "3.6.15"]
+                                  ]
                    :source-paths ["dev/src"]
                    :repl-options {:init-ns dev}}
              :uberjar {:main health-record-app.core

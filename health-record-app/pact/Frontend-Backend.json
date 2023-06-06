@@ -1,0 +1,33 @@
+{
+  "consumer": {
+    "name": "ConsumerService"
+  },
+  "provider": {
+    "name": "ProviderService"
+  },
+  "interactions": [
+    {
+      "description": "A request for a user",
+      "providerState": "A user with ID 1 exists",
+      "request": {
+        "method": "GET",
+        "path": "/user/1"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "id": 1,
+          "name": "User One"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  }
+}
