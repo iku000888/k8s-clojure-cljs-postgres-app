@@ -1,4 +1,4 @@
-.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward
+.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e
 TAG:=0.0.1
 
 health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar:
@@ -30,3 +30,6 @@ frontend-port-forward:
 
 minikube-up:
 	minikube start
+
+test-e2e:
+	cd test/e2e/ && make run-headless
