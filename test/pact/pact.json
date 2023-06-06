@@ -1,0 +1,35 @@
+{
+  "provider": {
+    "name": "Provider"
+  },
+  "consumer": {
+    "name": "Consumer"
+  },
+  "interactions": [
+    {
+      "description": "a request to say Hello",
+      "type": "Synchronous/HTTP",
+      "request": {
+        "method": "POST",
+        "path": "/hello",
+        "body": {
+          "name": "harry"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "hello": "harry"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "4.0"
+    },
+    "pact-jvm": {
+      "version": "4.6.0"
+    }
+  }
+}

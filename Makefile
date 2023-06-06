@@ -33,3 +33,6 @@ minikube-up:
 
 test-e2e:
 	cd test/e2e/ && make run-headless
+
+test-pact:
+	cd test/pact/ && make pact-verify
