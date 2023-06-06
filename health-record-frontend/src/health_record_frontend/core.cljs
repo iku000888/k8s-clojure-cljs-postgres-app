@@ -201,7 +201,6 @@
      ($ shr/Table {:fixedHead true}
         (d/thead
          (cond
-
            request-error
            ($ shr/BulkActionRow
               ($ shr/InformationPanel {:title "Request Failed"

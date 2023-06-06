@@ -41,6 +41,9 @@ While the optimal choice is highly contextual in real life, in this project I fo
 
 ### End To End test
 
+End to end tests are the final line of defense against shipping something broken to prod.
+Generally these are more expensive to run and sometimes compromises are made to not run them om every commit but rather are run as a 'before deploy to prod' check.
+
 - objective:
   - assure all systems involved work together
   - make sure the entire stack is working from user interface down to the infrastructure layer
@@ -56,9 +59,15 @@ While the optimal choice is highly contextual in real life, in this project I fo
 
 ### Integration test
 
+Integration tests can overlap overlap in terms of scope with e2e/unit tests, but for this project
+I define it as tests serving the following objectives.
+
 - objective:
   - Assure the system on its own is not broken
+    - API: test all the helper functions/db access functions/http handlers work together
+    - UI: test all components and helper functions work together.
     - For UI, this could be a good place to run cross browser checks
+    - OK to test error states esp. if it is significant to consumer.
   - Test a system in its entirety without other other systems involved.
     - In this project I reify this as:
       - UI integration test -> make sure UI code functions minus API calls.
@@ -66,8 +75,22 @@ While the optimal choice is highly contextual in real life, in this project I fo
 
 ### Unit test
 
+Unit tests are at the lowest level of the test pyramid.
+Generally these should be run on every commit and block a PR from merging when failing.
+
+- objective:
+  - fast
+    - avoid real world I/O
+  - test small parts
+    - i.e. individual functions
+  - strive to catch as many bugs at this layer
+
 #### API
 
 #### Frontend
 
 ### Performance test
+
+### Acceptance test/Functional test/BDD
+
+### Contract test
