@@ -132,13 +132,15 @@
              {:className "patient-form-container"
               :layout "single"
               :items (clj->js  [{:term "Name"
-                                 :description ($ shr/Input {:error (empty? (:name edited-patient))
+                                 :description ($ shr/Input {:id "patient-form-name"
+                                                            :error (empty? (:name edited-patient))
                                                             :value (:name edited-patient)
                                                             :onChange #(set-edited-patient
                                                                         (fn [ep]
                                                                           (assoc ep :name (.-value (.-target %)))))})}
                                 {:term "Gender"
-                                 :description ($ shr/Select {:error (empty? (:gender edited-patient))
+                                 :description ($ shr/Select {:id "patient-form-gender"
+                                                             :error (empty? (:gender edited-patient))
                                                              :value (:gender edited-patient)
                                                              :onChange #(set-edited-patient
                                                                          (fn [ep]
@@ -150,18 +152,21 @@
                                                                                 {:label "Female"
                                                                                  :value "Female"}])})}
                                 {:term "Date of Birth"
-                                 :description ($ shr/DatePicker {:value (:date_of_birth edited-patient)
+                                 :description ($ shr/DatePicker {:id "patient-form-dob"
+                                                                 :value (:date_of_birth edited-patient)
                                                                  :formatDate format-date
                                                                  :onChangeDate #(set-edited-patient
                                                                                  (fn [ep]
                                                                                    (assoc ep :date_of_birth %2)))})}
                                 {:term "Address"
-                                 :description ($ shr/Input {:value (:address edited-patient)
+                                 :description ($ shr/Input {:id "patient-form-address"
+                                                            :value (:address edited-patient)
                                                             :onChange #(set-edited-patient
                                                                         (fn [ep]
                                                                           (assoc ep :address (.-value (.-target %)))))})}
                                 {:term "Phone number (xxx xxx xxxx)"
-                                 :description ($ shr/Input {:error (not (valid-phone-number? (:phone_number edited-patient)))
+                                 :description ($ shr/Input {:id "patient-form-phone"
+                                                            :error (not (valid-phone-number? (:phone_number edited-patient)))
                                                             :defaultValue (:phone_number edited-patient)
                                                             :onChange #(set-edited-patient
                                                                         (fn [ep]
@@ -208,7 +213,8 @@
 
            request-success
            ($ shr/BulkActionRow
-              ($ shr/InformationPanel {:title "Request Success"
+              ($ shr/InformationPanel {:id "success-message"
+                                       :title "Request Success"
                                        :decorators #js {:closeButtonLabel (fn [r] "Dismiss")}
                                        :onClickTrigger (fn []
                                                          (set-request-success nil))
@@ -217,7 +223,9 @@
 
            :else
            ($ shr/BulkActionRow
-              ($ shr/SearchInput {:tooltipMessage "Filter by space delimited Name, Address, Phone number or DOB"
+              ($ shr/SearchInput {:id "search-input"
+                                  :value filter-input
+                                  :tooltipMessage "Filter by space delimited Name, Address, Phone number or DOB"
                                   :onChange #(set-filter-input
                                               (.-value (.-target %)))})
               (when (seq selected-patient-ids)
@@ -234,7 +242,8 @@
                    "New Patient"))))
 
          (d/tr
-          ($ shr/ThCheckbox {:onClick #(toggle-select-all-patient-id
+          ($ shr/ThCheckbox {:id "check-all"
+                             :onClick #(toggle-select-all-patient-id
                                         (when-not(empty? filter-input)
                                           filtered-patients))
                              :checked (= selected-patient-ids (set (keys patients)))})
@@ -247,7 +256,8 @@
         (d/tbody
          (for [[id p] filtered-patients]
            (d/tr {:key id}
-                 ($ shr/TdCheckbox {:onClick #(select-patient-id id)
+                 ($ shr/TdCheckbox {:id "check-one"
+                                    :onClick #(select-patient-id id)
                                     :checked (some? (selected-patient-ids id))})
                  ($ shr/Td
                     (:name p))

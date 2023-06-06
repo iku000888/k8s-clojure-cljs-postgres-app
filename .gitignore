@@ -5,4 +5,4 @@
 /health-record-frontend/shadow-cljs.edn
 /health-record-frontend/package.json
 /health-record-frontend/public/js/
-/test/e2e/node_modules/
+*node_modules*
