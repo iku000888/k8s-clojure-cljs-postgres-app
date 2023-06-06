@@ -3,6 +3,7 @@
   :handler/patients {:start (health-record-app.handler/patients (clip/ref :db))}
   :handler/patients.add {:start (health-record-app.handler/patients.add (clip/ref :db))}
   :handler/patients.update {:start (health-record-app.handler/patients.update (clip/ref :db))}
+  :handler/pact-setp {:start (health-record-app.handler/pact-setup (clip/ref :db))}
   :db {:start (health-record-app.db/pool {:host #or [#env DB_HOST "localhost"]
                                           :port 5432
                                           :dbtype "postgres"
@@ -12,7 +13,12 @@
        :stop (health-record-app.db/pool.stop this)}
   :server {:start (health-record-app.server/aleph-server
                    {:port 8080
-                    :resources {:patients {:methods
+                    :resources {:pact-setup {:methods
+                                             {:post
+                                              {:produces "application/json"
+                                               :consumes #{"application/json"}
+                                               :response (clip/ref :handler/pact-setp)}}}
+                                :patients {:methods
                                            {:post
                                             {:produces "application/json"
                                              :consumes #{"application/json"}

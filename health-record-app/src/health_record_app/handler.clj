@@ -28,3 +28,13 @@
   (fn patients [req]
     (with-open [c (jdbc/get-connection db)]
       (sql/patients c))))
+
+(defn pact-setup [db]
+  (when true
+    #_(= "true"
+         (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP"))
+    (fn delete-all-patients [req]
+      (prn (:body req))
+      (with-open [c (jdbc/get-connection db)]
+        (doseq [{:keys [patient_id]} (sql/patients c)]
+          (sql/delete-patient c patient_id))))))

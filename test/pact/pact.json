@@ -10,17 +10,12 @@
       "description": "a request to say Hello",
       "type": "Synchronous/HTTP",
       "request": {
-        "method": "POST",
-        "path": "/hello",
-        "body": {
-          "name": "harry"
-        }
+        "method": "GET",
+        "path": "/api/patients/"
       },
       "response": {
         "status": 200,
-        "body": {
-          "hello": "harry"
-        }
+        "body": []
       }
     }
   ],
