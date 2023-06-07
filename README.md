@@ -112,9 +112,10 @@ In this project I opted not to author unit tests for frontend for 3 reasons.
 2. Most of the lower level components are third party and well tested
 3. How the components are combined with stateful interaction is a integration test notion
 
-### Performance test
+### Performance/load test
 
-TBD
+Regardless of how correct the system is, it will immediately face dissapointment if it can only handle 1 request every minute or it suddenly starts blowing up upon crossing some threshold. Ideally we could check how the sytem handles load so we can identify and address it before it goes out the door.
+I added a k6 script that hits the api with get requests and post requests with variable duration and concurrency(called vus). I got the api to fail 25% of the requests at 1000vus.
 
 ### Generative testing
 
