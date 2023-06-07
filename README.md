@@ -9,7 +9,6 @@
   - leiningen
   - npm
 
-
 ## Running@k8s
 
 - `minikube start`
@@ -94,3 +93,21 @@ Generally these should be run on every commit and block a PR from merging when f
 ### Acceptance test/Functional test/BDD
 
 ### Contract test
+
+Contract testing allows the provider and the consumer toverify compliance to the API independent of each other.
+This is practiced by the [pact family of tools](https://docs.pact.io/).
+For this project specifically, I created a pact.json file containing the happy path request/responses for the backend api which is the input to the following usecases
+
+#### Check that the api is compliant to the pact
+
+`make test-pact` takes the pact.json and makes http requests against the api after asking it to be put in a known state. This uses the pact verifier packaged in [the pact cli](https://hub.docker.com/r/pactfoundation/pact-cli)
+
+#### Use the pact as stub service
+
+`make pact-stub` spins up a stub server serving responses as specified in the pact
+This uses the pact stub service packaged in [the pact cli](https://hub.docker.com/r/pactfoundation/pact-cli)
+
+#### Check that the stub is compliant to the pact
+
+Kinda silly, but nontheless it is cool that the pact can generate request and responses without any lines of code. Assuming the pact stub server running,
+`make test-pact-without-setup` runs the verification from the same pact, except it skips the provider state set up steps.
