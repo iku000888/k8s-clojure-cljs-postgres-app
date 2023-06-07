@@ -21,12 +21,12 @@
                  [com.github.seancorfield/next.jdbc "1.3.874"]
                  [com.zaxxer/HikariCP "3.3.1"]
                  [org.postgresql/postgresql "42.2.10"]]
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]
-                                  [au.com.dius.pact.consumer/junit "4.6.0"]
-                                  [au.com.dius.pact.provider/junit "4.6.0"]
-                                  [au.com.dius/pact-jvm-model "3.6.15"]
-                                  ]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]]
                    :source-paths ["dev/src"]
                    :repl-options {:init-ns dev}}
+             :kaocha {:dependencies [[lambdaisland/kaocha "1.84.1335"]
+                                     [lambdaisland/kaocha-cucumber "0.11.100"]]}
+
              :uberjar {:main health-record-app.core
-                       :aot [health-record-app.core]}})
+                       :aot [health-record-app.core]}}
+  :aliases {"kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]})
