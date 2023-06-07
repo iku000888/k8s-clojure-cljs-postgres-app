@@ -19,6 +19,15 @@
 - tab 2 `make frontend-port-forward`
 - open http://localhost:8700
 
+## Architectural choices
+
+TBD
+
+## CI/CD
+
+Docker images deployable to k8s for the frontend and the backend are produced on every commit by github actions.
+[See it working](https://github.com/iku000888/k8s-clojure-cljs-postgres-app/actions)
+
 ## Running@ locally for dev
 
 ### API
@@ -69,8 +78,16 @@ I define it as tests serving the following objectives.
     - OK to test error states esp. if it is significant to consumer.
   - Test a system in its entirety without other other systems involved.
     - In this project I reify this as:
-      - UI integration test -> make sure UI code functions minus API calls.
+      - UI integration test -> make sure UI code functions minus actual API calls.
       - API integration test -> invoke against running api with http client & check responses.
+
+#### Backend
+
+TBD
+
+#### Frontend
+
+- The UI pact test achieves the above objective with completely controlled api responses, so the UI pact test is double dipped as the UI integration test.
 
 ### Unit test
 
@@ -86,16 +103,26 @@ Generally these should be run on every commit and block a PR from merging when f
 
 #### API
 
+TBD
+
 #### Frontend
+
+In this project I opted not to author unit tests for frontend for 3 reasons.
+1. Prioritize e2e and pact test
+2. Most of the lower level components are third party and well tested
+3. How the components are combined with stateful interaction is a integration test notion
 
 ### Performance test
 
-k6
+TBD
+
+### Generative testing
+
+TBD
 
 ### Acceptance test/Functional test/BDD
 
-Did not have time to do a deep dive on this.
-I am at this moment bit on the skeptic on the effectiveness beyond presentation sugar.
+TBD
 
 ### Contract test
 
