@@ -7,23 +7,12 @@
   },
   "interactions": [
     {
-      "description": "Initially empty",
+      "description": "Add a patient",
       "providerStates": [
         {
           "name": "No patients exist"
         }
       ],
-      "request": {
-        "method": "GET",
-        "path": "/api/patients/"
-      },
-      "response": {
-        "status": 200,
-        "body": []
-      }
-    },
-    {
-      "description": "Add a patient",
       "request": {
         "method": "POST",
         "headers": {
@@ -40,6 +29,9 @@
         }
       },
       "response": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "status": 200,
         "body": {
           "patient_id": 999,
@@ -53,11 +45,22 @@
     },
     {
       "description": "Patient Added",
+      "providerStates": [
+        {
+          "name": "Patient Added"
+        }
+      ],
       "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "method": "GET",
         "path": "/api/patients/"
       },
       "response": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "status": 200,
         "body": [
           {
@@ -74,6 +77,9 @@
     {
       "description": "Update a patient",
       "request": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "method": "PUT",
         "headers": {
           "Content-Type": "application/json"
@@ -89,28 +95,12 @@
         }
       },
       "response": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "status": 200,
         "body": {
         }
-      }
-    },
-    {
-      "description": "Patient Updated",
-      "request": {
-        "method": "GET",
-        "path": "/api/patients/"
-      },
-      "response": {
-        "status": 200,
-        "body": [
-          {
-            "name": "Limmy Lon",
-            "gender": "Male",
-            "date_of_birth": "2001-03-28",
-            "address": "123 Block C, CA",
-            "phone_number": "333 444 9998"
-          }
-        ]
       }
     },
     {
@@ -120,20 +110,12 @@
         "path": "/api/patients/999"
       },
       "response": {
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "status": 200,
         "body": {
         }
-      }
-    },
-    {
-      "description": "Patient deleted",
-      "request": {
-        "method": "GET",
-        "path": "/api/patients/"
-      },
-      "response": {
-        "status": 200,
-        "body": []
       }
     }
   ],
