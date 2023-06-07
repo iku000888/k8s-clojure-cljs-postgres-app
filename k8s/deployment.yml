@@ -46,6 +46,8 @@ spec:
             value: http://localhost:8080
           - name: DB_HOST
             value: postgres-service
+          - name: _DANGEROUSLY_ENABLE_PACT_SETUP
+            value: true
 
 ---
 

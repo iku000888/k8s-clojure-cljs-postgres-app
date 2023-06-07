@@ -57,9 +57,8 @@
      ["/" (merge {"api/" {"patients/"
                           {"" (yada.yada/resource (:patients resources+))
                            [[long :patient-id]] (yada.yada/resource (:patient resources+))}}}
-                 (when true
-                   #_(= "true"
-                        (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP"))
+                 (when (= "true"
+                          (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP"))
                    {"pact-setup/" (yada.yada/resource (:pact-setup resources+))}))]
      {:port port :raw-stream? true})))
 
