@@ -51,9 +51,6 @@
         }
       ],
       "request": {
-        "headers": {
-          "Content-Type": "application/json"
-        },
         "method": "GET",
         "path": "/api/patients/"
       },

@@ -6,16 +6,19 @@
   :dependencies [[org.clojure/clojure "1.11.0"]
                  [thheller/shadow-cljs "2.23.3"]
                  [lilactown/helix "0.1.10"]
-                 [cljs-ajax "0.8.4"]]
+                 [cljs-ajax "0.8.4"]
+                 [org.clojure/core.async "1.6.673"]]
   :plugins [[lein-shadow "0.4.1"]]
   :repl-options {:init-ns helix-demo.core}
   :npm-deps [[react "18.2.0"]
              [react-dom "18.2.0"]
              [smarthr-ui "31.1.0"]
              [styled-components "5.3.11"]
-             [process "0.11.10"]]
+             [process "0.11.10"]
+             ["@testing-library/react" "14.0.0"]
+             ["@testing-library/user-event" "14.4.3"]]
   :shadow-cljs
-  {:source-paths ["src"]
+  {:source-paths ["src" "test"]
    :nrepl        {:port 8777}
    :builds
    {:app {:target :browser
@@ -33,5 +36,13 @@
            :after-load health-record-frontend.core/start
            ;; serve the public directory over http at port 8700
            :http-root    "public"
-           :http-port    8700}
-          }}})
+           :http-port    8700}}
+
+    :component-test
+    {:target :browser-test
+     :test-dir "tests"
+
+     :devtools
+     {:http-root    "tests"
+      :http-port    8701}}
+    }})

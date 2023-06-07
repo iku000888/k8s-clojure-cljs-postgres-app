@@ -11,6 +11,9 @@ locally-build-images: health-record-app/target/health-record-app-0.1.0-SNAPSHOT-
 	docker build health-record-app -t ghcr.io/iku000888/health-record-api:${TAG}
 	docker build health-record-frontend -t ghcr.io/iku000888/health-record-frontend:${TAG}
 
+minikube-rm-images:
+	minikube image rm ghcr.io/iku000888/health-record-api:${TAG}
+
 locally-load-images:
 	minikube image load ghcr.io/iku000888/health-record-frontend:${TAG}
 	minikube image load ghcr.io/iku000888/health-record-api:${TAG}
@@ -42,3 +45,6 @@ test-pact-without-setup:
 
 pact-stub:
 	cd test/pact/ && make pact-stub
+
+cypress-open:
+	cd test/e2e/ && make cypress-open
