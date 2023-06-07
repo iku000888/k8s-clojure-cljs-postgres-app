@@ -90,7 +90,12 @@ Generally these should be run on every commit and block a PR from merging when f
 
 ### Performance test
 
+k6
+
 ### Acceptance test/Functional test/BDD
+
+Did not have time to do a deep dive on this.
+I am at this moment bit on the skeptic on the effectiveness beyond presentation sugar.
 
 ### Contract test
 
@@ -111,3 +116,9 @@ This uses the pact stub service packaged in [the pact cli](https://hub.docker.co
 
 Kinda silly, but nontheless it is cool that the pact can generate request and responses without any lines of code. Assuming the pact stub server running,
 `make test-pact-without-setup` runs the verification from the same pact, except it skips the provider state set up steps.
+
+#### Check that the UI is compliant to the pact
+
+- `make pact-stub`
+- `make ui-pact-test`
+- open `http://localhost:8701`

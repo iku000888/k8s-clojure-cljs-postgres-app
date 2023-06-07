@@ -11,8 +11,8 @@
 (defn new-patient []
   (go
     (t/testing "New patient flow sends compliant POST request"
-      (<p! (.click userEvent
-                   (.getByText rt/screen "New Patient")))
+      p      (<p! (.click userEvent
+                          (.getByText rt/screen "New Patient")))
       (<p! (rt/waitFor (fn [] (.getByLabelText rt/screen "Name"))
                        #js {:timeout 10000}))
       (<p! (.selectOptions userEvent

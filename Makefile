@@ -1,4 +1,4 @@
-.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e test-pact pact-stub
+.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e test-pact pact-stub ui-patct-test
 TAG:=0.0.1
 
 health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar:
@@ -48,3 +48,6 @@ pact-stub:
 
 cypress-open:
 	cd test/e2e/ && make cypress-open
+
+ui-patct-test:
+	cd health-record-frontend && lein shadow watch component-test
