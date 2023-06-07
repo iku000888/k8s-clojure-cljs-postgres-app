@@ -20,7 +20,8 @@
         },
         "path": "/api/patients/",
         "body": {
-          "patient_id": 999,
+            // uncomment this to run against actual api so that request can control id
+            // "patient_id": 999,
           "name": "Jimmy Jon",
           "phone_number": "333 444 9999",
           "address": "123 Block B, CA",

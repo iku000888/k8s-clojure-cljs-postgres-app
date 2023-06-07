@@ -125,8 +125,11 @@
                                                             edited-patient)
                                             (add-patient edited-patient)))
                          :width 800
+                         :actionDisabled (not (seq (:name edited-patient)))
                          :decorators #js {:closeButtonLabel (fn [r] "Close")}
-                         :actionText "Submit"
+                         :actionText (if (not (seq (:name edited-patient)))
+                                       "Please fix input"
+                                       "Submit")
                          :onClickClose close}
        ($ shr/Center
           ($ shr/DefinitionList
