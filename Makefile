@@ -1,4 +1,4 @@
-.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e test-pact pact-stub ui-patct-test k6-test cucumber-test
+.PHONY: locally-build-images locally-load-images postgres-port-forward minikube-up pull-images api-port-forward frontend-port-forward test-e2e test-pact pact-stub ui-patct-test k6-test cucumber-test api-unit-test
 TAG:=0.0.1
 
 health-record-app/target/health-record-app-0.1.0-SNAPSHOT-standalone.jar:
@@ -57,3 +57,6 @@ k6-test:
 
 cucumber-test:
 	cd health-record-app && lein kaocha features
+
+api-unit-test:
+	cd health-record-app && lein test

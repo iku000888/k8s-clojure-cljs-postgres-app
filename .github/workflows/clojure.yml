@@ -39,6 +39,9 @@ jobs:
           # cljstyle: 0.15.0             # cljstyle
           # cmd-exe-workaround: 'latest' # Replaces `clojure` with `deps.clj` on Windows
           # zprint: 1.2.3                # zprint
+      - name: unit test
+        working-directory: ./health-record-app
+        run: lein test
 
       - name: Uberjar
         working-directory: ./health-record-app
