@@ -11,7 +11,7 @@
                  #_[aleph "0.4.7-alpha5"]
                  [aleph "0.6.2"]
                  [org.clj-commons/byte-streams "0.3.2"]
-                 #_[manifold "0.1.9-alpha3"]
+
                  [manifold "0.4.1"]
                  [juxt/clip "0.28.0"]
                  [aero "1.1.6"]
@@ -21,7 +21,8 @@
                  [com.github.seancorfield/next.jdbc "1.3.874"]
                  [com.zaxxer/HikariCP "3.3.1"]
                  [org.postgresql/postgresql "42.2.10"]]
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]
+                                  [nubank/mockfn "0.7.0"]]
                    :source-paths ["dev/src"]
                    :repl-options {:init-ns dev}}
              :kaocha {:dependencies [[lambdaisland/kaocha "1.84.1335"]

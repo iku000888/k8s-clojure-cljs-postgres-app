@@ -2,9 +2,16 @@
   (:require [health-record-app.sql :as sql]
             [next.jdbc :as jdbc]))
 
+;; The as-other values are not interned and equality breaks
+;; across every call making testing harder.
+;; Making it static allows re-use of the same instance and maintains equality
+(def ->sqlenum
+  {"Male" (next.jdbc.types/as-other "Male")
+   "Female" (next.jdbc.types/as-other "Female")})
+
 (defn ->sql-patient [{:keys [gender date_of_birth] :as patient}]
   (cond-> patient
-    gender (update :gender next.jdbc.types/as-other)
+    gender (update :gender ->sqlenum)
     date_of_birth (update :date_of_birth #(java.time.LocalDate/parse %))))
 
 (defn patients.add [db]

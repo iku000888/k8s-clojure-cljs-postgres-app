@@ -1,7 +1,102 @@
 (ns health-record-app.core-test
   (:require [clojure.test :refer :all]
-            [health-record-app.core :refer :all]))
+            [cheshire.core :as che]
+            [health-record-app.core :refer :all]
+            [mockfn.macros :as mfn]
+            [mockfn.matchers :as matchers]
+            [juxt.clip.core :as clip :refer [with-system]]
+            [health-record-app.core :as core]
+            [health-record-app.db :as db]
+            [health-record-app.server :as server]
+            [yada.handler :refer [as-handler]]
+            [next.jdbc :as jdbc]
+            [next.jdbc.sql :as sql]
+            [health-record-app.handler :as handler]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(defn yada-body->json [b]
+  (let [ba (byte-array (.remaining b))]
+    (.get b ba)
+    (che/decode
+     (slurp ba)
+     keyword)))
+
+(deftest handler-tests
+  (let [conn-mock (reify java.sql.Connection
+                    (close [this] nil))]
+    (mfn/providing
+     [(db/pool (matchers/any)) ::pool
+      (db/pool.stop ::pool) nil
+      (jdbc/get-connection ::pool) conn-mock]
+     (with-system [s (update (core/config) :components dissoc :server)]
+       (let [handler (as-handler (server/routes (:resources s)))]
+         (testing "GET /api/patients/ - db mocked"
+           (is (= [{:name "Joel",
+                    :gender "Male",
+                    :address "200 ln",
+                    :phone_number "333 444 8888",
+                    :date_of_birth "2000-10-11"}]
+                  (-> (mfn/providing
+                       [(sql/query conn-mock ["select * from patients"]
+                                   {:builder-fn next.jdbc.result-set/as-unqualified-maps})
+                        [{:name "Joel" :gender "Male" :address "200 ln"
+                          :phone_number "333 444 8888" :date_of_birth "2000-10-11"}]]
+                       @(handler {:request-method :get
+                                  :uri "/api/patients/"}))
+                      :body
+                      yada-body->json))))
+         (testing "POST /api/patients/ - db mocked"
+           (let [patient {:name "Joel",
+                          :gender "Male",
+                          :address "200 ln",
+                          :phone_number "333 444 8888",
+                          :date_of_birth "2000-10-11"}]
+             (is (= patient
+                    (-> (mfn/providing
+                         [(sql/insert! conn-mock :patients (handler/->sql-patient patient)
+                                       {:builder-fn next.jdbc.result-set/as-unqualified-maps})
+                          patient]
+                         @(handler {:headers {"content-type" "application/json"
+                                              "content-length" "65"}
+                                    :request-method :post
+                                    :uri "/api/patients/"
+                                    :body (che/encode
+                                           {:name "Joel",
+                                            :gender "Male",
+                                            :address "200 ln",
+                                            :phone_number "333 444 8888",
+                                            :date_of_birth "2000-10-11"})}))
+                        :body
+                        yada-body->json)))))
+         (testing "PUT /api/patients/1 - db mocked"
+           (let [patient {:name "Joel",
+                          :gender "Male",
+                          :address "200 ln",
+                          :phone_number "333 444 8888",
+                          :date_of_birth "2000-10-11"}]
+             (is (= {:next.jdbc/update-count 1}
+                    (-> (mfn/providing
+                         [(sql/update! conn-mock :patients
+                                       (health-record-app.handler/->sql-patient patient)
+                                       {:patients/patient_id 1})
+                          {:next.jdbc/update-count 1}]
+                         @(handler {:headers {"content-type" "application/json"
+                                              "content-length" "65"}
+                                    :request-method :put
+                                    :uri "/api/patients/1"
+                                    :body (che/encode
+                                           {:name "Joel",
+                                            :gender "Male",
+                                            :address "200 ln",
+                                            :phone_number "333 444 8888",
+                                            :date_of_birth "2000-10-11"})}))
+                        :body
+                        yada-body->json)))))
+         (testing "DELETE /api/patients/1 - db mocked"
+           (is (= {:next.jdbc/update-count 1}
+                  (-> (mfn/providing
+                       [(sql/delete! conn-mock :patients {:patients/patient_id 1})
+                        {:next.jdbc/update-count 1}]
+                       @(handler {:request-method :delete
+                                  :uri "/api/patients/1"}))
+                      :body
+                      yada-body->json)))))))))

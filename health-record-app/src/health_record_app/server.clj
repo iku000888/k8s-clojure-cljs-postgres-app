@@ -48,19 +48,25 @@
                              yada.interceptors/create-response
                              yada.interceptors/return]))
 
-(defn aleph-server [{:keys [resources
-                            port]}]
+(defn routes [resources]
   (let [resources+ (into {} (map (fn [[k v]]
                                    [k (dope-resource v)])
                                  resources))]
-    (yada/listener
-     ["/" (merge {"api/" {"patients/"
-                          {"" (yada.yada/resource (:patients resources+))
-                           [[long :patient-id]] (yada.yada/resource (:patient resources+))}}}
-                 (when (= "true"
-                          (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP"))
-                   {"pact-setup/" (yada.yada/resource (:pact-setup resources+))}))]
-     {:port port :raw-stream? true})))
+    ["/" (merge {"api/" {"patients/"
+                         {"" (yada.yada/resource (:patients resources+))
+                          [[long :patient-id]] (yada.yada/resource (:patient resources+))}}}
+                (when (= "true"
+                         (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP"))
+                  {"pact-setup/" (yada.yada/resource (:pact-setup resources+))}))]))
+
+(defn aleph-server [{:keys [resources
+                            port]}]
+  (yada/listener
+   (routes resources)
+   {:port port :raw-stream? true}))
 
 (defn aleph-server.stop [server]
   (.close (:server server)))
+(comment
+  (:resources juxt.clip.repl/system)
+  )

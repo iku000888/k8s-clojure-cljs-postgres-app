@@ -11,26 +11,27 @@
                                           :user "your_username"
                                           :password "your_password"})
        :stop (health-record-app.db/pool.stop this)}
+  :resources {:start {:pact-setup {:methods
+                                   {:post
+                                    {:produces "application/json"
+                                     :consumes #{"application/json"}
+                                     :response (clip/ref :handler/pact-setp)}}}
+                      :patients {:methods
+                                 {:post
+                                  {:produces "application/json"
+                                   :consumes #{"application/json"}
+                                   :response (clip/ref :handler/patients.add)}
+                                  :get
+                                  {:produces "application/json"
+                                   :response (clip/ref :handler/patients)}}}
+                      :patient {:methods
+                                {:put
+                                 {:produces "application/json"
+                                  :consumes #{"application/json"}
+                                  :response (clip/ref :handler/patients.update)}                                                                :delete
+                                 {:produces "application/json"
+                                  :response (clip/ref :handler/patient.delete)}}}}}
   :server {:start (health-record-app.server/aleph-server
                    {:port 8080
-                    :resources {:pact-setup {:methods
-                                             {:post
-                                              {:produces "application/json"
-                                               :consumes #{"application/json"}
-                                               :response (clip/ref :handler/pact-setp)}}}
-                                :patients {:methods
-                                           {:post
-                                            {:produces "application/json"
-                                             :consumes #{"application/json"}
-                                             :response (clip/ref :handler/patients.add)}
-                                            :get
-                                            {:produces "application/json"
-                                             :response (clip/ref :handler/patients)}}}
-                                :patient {:methods
-                                          {:put
-                                           {:produces "application/json"
-                                            :consumes #{"application/json"}
-                                            :response (clip/ref :handler/patients.update)}                                                                :delete
-                                           {:produces "application/json"
-                                            :response (clip/ref :handler/patient.delete)}}}}})
+                    :resources (clip/ref :resources)})
            :stop (health-record-app.server/aleph-server.stop this)}}}
