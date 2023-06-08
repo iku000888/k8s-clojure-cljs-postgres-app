@@ -123,7 +123,13 @@ TBD
 
 ### Acceptance test/Functional test/BDD
 
-TBD
+I explored BDD+Cucumber with [kaocha-cucumber](https://github.com/lambdaisland/kaocha-cucumber), which is a way of describing test scenarios in a human friendly format and backing up them with code to excersize and assert on the scenarios. This doubles as the integration test for the api, but the methodology is orthogonal to the granularity of the test.
+
+To run,
+
+```
+make cucumber-test
+```
 
 ### Contract test
 
