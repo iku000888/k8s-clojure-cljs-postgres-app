@@ -7,6 +7,6 @@
          {:id                  :features
           :type                :kaocha.type/cucumber
           :source-paths        ["src"]
-          :test-paths          ["test/features"]
-          :cucumber/glue-paths ["test/steps_definitions"]
+          :test-paths          ["bdd/features"]
+          :cucumber/glue-paths ["bdd/steps_definitions"]
           }]}

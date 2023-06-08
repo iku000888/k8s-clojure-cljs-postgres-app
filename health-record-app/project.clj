@@ -25,7 +25,8 @@
                    :source-paths ["dev/src"]
                    :repl-options {:init-ns dev}}
              :kaocha {:dependencies [[lambdaisland/kaocha "1.84.1335"]
-                                     [lambdaisland/kaocha-cucumber "0.11.100"]]}
+                                     [lambdaisland/kaocha-cucumber "0.11.100"]]
+                      :source-paths ["bdd"]}
 
              :uberjar {:main health-record-app.core
                        :aot [health-record-app.core]}}
