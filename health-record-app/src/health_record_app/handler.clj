@@ -36,9 +36,12 @@
     (with-open [c (jdbc/get-connection db)]
       (sql/patients c))))
 
+(defn- pact-setup-enabled? []
+  (= "true"
+     (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP")))
+
 (defn pact-setup [db]
-  (when (= "true"
-           (System/getenv "_DANGEROUSLY_ENABLE_PACT_SETUP"))
+  (when (pact-setup-enabled?)
     (fn delete-all-patients [req]
       (prn (:body req))
       (prn (:headers (:request req)))

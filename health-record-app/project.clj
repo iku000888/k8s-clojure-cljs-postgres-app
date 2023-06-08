@@ -21,8 +21,10 @@
                  [com.github.seancorfield/next.jdbc "1.3.874"]
                  [com.zaxxer/HikariCP "3.3.1"]
                  [org.postgresql/postgresql "42.2.10"]]
+
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]
                                   [nubank/mockfn "0.7.0"]]
+                   :plugins [[lein-cloverage "1.2.2"]]
                    :source-paths ["dev/src"]
                    :repl-options {:init-ns dev}}
              :kaocha {:dependencies [[lambdaisland/kaocha "1.84.1335"]

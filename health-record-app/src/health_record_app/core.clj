@@ -8,7 +8,6 @@
             [clojure.java.io :as io]
             [aero.core :refer [read-config]]))
 
-
 (defn config []
   (log/initialize!)
   (clip.edn/load
