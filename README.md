@@ -1,5 +1,12 @@
 # App
 
+A practice piece app covering the following:
+- API written with Clojure
+- Frontend written in ClojureScript
+- CI/CD with github actions
+- Deployable to k8s
+- Wide array of testing methodology
+
 ## Prerequisites
 
 - minikube https://minikube.sigs.k8s.io/docs/start/
@@ -19,9 +26,37 @@
 - tab 2 `make frontend-port-forward`
 - open http://localhost:8700
 
-## Architectural choices
+## Choices
 
-TBD
+In this section I will elaborate the deliberate choices of each library/technology in this project, with commentary on alternatives and my sentiment towards them. As a general rule of thumb I intentionally leaned towards options that I am less familiar with to maximize the learning out of this project.
+
+### Architectural
+
+#### API
+
+- [clip](https://github.com/juxt/clip)
+  - IOC library to organize compontent dependencies
+  - Most familar alternatives are [componet](https://github.com/stuartsierra/component) and [integrant](https://github.com/weavejester/integrant), where I have been most intimate wit integrant.
+  - comment:
+    - I really liked it and probably will use it instead of integrant!
+    - integrant couples how the component is created with how it is referenced in the system map, and imposes ergonomic challenges with very long keys.
+- [yada](https://github.com/juxt/yada) + [aleph](https://github.com/juxt/yada)
+  - Serve HTTP, fully asynchronously by yada's interceptor model + aleph's async i/o
+  - Alternative would be ring+jetty
+  - comment:
+    - Very steep learning curve.
+      - Yada's documentation is [incomplete](https://github.com/juxt/yada/blob/master/doc/interceptors.adoc) in many places and I had to rely on source to understand what was going on.
+      - I appreciated the expressiveness of the resource model and could be a great solution to problems like "I don't know what my ring middlewares are doing". However, it again loses points because documentation is sparse. For instance I had to study the access-control-headers interceptor to configure CORS.
+      - locked in to [bidi](https://github.com/juxt/bidi)
+        - I found the syntax really hard and found reitit easier to understand.
+
+#### Frontend
+
+- [helix](https://github.com/lilactown/helix)
+  - allows taking advantage of modern react facilities (useState, useEffect etc) very easily from ClojureScript
+- [smarthr-ui](https://github.com/kufu/smarthr-ui)
+  - observed some hype about it in Japan, so wanted to check it out.
+  - very Japanese language optimized and don't like the font choices for english
 
 ## CI/CD
 
@@ -103,7 +138,24 @@ Generally these should be run on every commit and block a PR from merging when f
 
 #### API
 
-TBD
+For the api unit tests I tested the api handlers with the db calls mocked by [mockfn](https://github.com/nubank/mockfn) library. As a bonus I also measured test coverage with [cloverage](https://github.com/cloverage/cloverage)
+
+```
+|---------------------------+---------+---------|
+|                 Namespace | % Forms | % Lines |
+|---------------------------+---------+---------|
+|                       dev |  100.00 |  100.00 |
+|    health-record-app.core |   36.84 |   53.33 |
+|      health-record-app.db |    5.88 |   20.00 |
+| health-record-app.handler |   93.92 |  100.00 |
+|  health-record-app.server |   75.45 |   85.71 |
+|     health-record-app.sql |  100.00 |  100.00 |
+|---------------------------+---------+---------|
+|                 ALL FILES |   72.10 |   78.17 |
+|---------------------------+---------+---------|
+```
+
+If the app had extensive validation logic or friendly error handling those would defininately be tested here as well.
 
 #### Frontend
 
