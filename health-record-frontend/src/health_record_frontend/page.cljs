@@ -105,7 +105,22 @@
      :request-success request-success
      :set-request-success set-request-success
      :request-error request-error
-     :set-request-error set-request-error}))
+     :set-request-error set-request-error
+     :query-patients (fn [query]
+                       (GET (str "http://localhost:8080/api/patients/"
+                                 "?"
+                                 (str/join "&"
+                                           (map (fn [[k v]]
+                                                  (str (name k) "=" v))
+                                                query)))
+                            {:response-format :json
+                             :keywords? true
+                             :handler #(set-patients (->> %
+                                                          (map (fn [p]
+                                                                 [(:patient_id p)
+                                                                  p]))
+                                                          (into {})))
+                             :error-handler #(set-request-error %)}))}))
 
 (def theme (shr/createTheme))
 
@@ -114,6 +129,85 @@
       ;; just made chat gpt produce something
       (not (empty? (re-matches #"\(?([2-9][0-8][0-9])\)?[-. ]?([2-9][0-9]{2})[-. ]?([0-9]{4})"
                                phone)))))
+
+(defnc search-form [{:keys [submit-query query close update-patient]}]
+  (let [[edited-query set-edited-query] (hooks/use-state query)]
+    ($ shr/ActionDialog {:title "Advance Search"
+                         :isOpen (some? query)
+                         :onClickAction (fn []
+                                          (submit-query edited-query)
+                                          (close))
+                         :width 800
+                         :decorators #js {:closeButtonLabel (fn [r] "Close")}
+                         :actionText "Submit"
+                         :onClickClose close}
+       ($ shr/Center
+          (pr-str edited-query)
+          ($ shr/DefinitionList
+             {:className "patient-form-container"
+              :layout "single"
+              :items (clj->js  [{:description ($ shr/FormControl {:title "Filter Logic"
+                                                                  :className "filter-logic"}
+                                                 ($ shr/Select {:name "Filter Logic"
+                                                                :value (:filter_logic edited-query)
+                                                                :onChange #(set-edited-query
+                                                                            (fn [ep]
+                                                                              (assoc ep :filter_logic (.-value (.-target %)))))
+                                                                :options (clj->js [{:label ""
+                                                                                    :value nil}
+                                                                                   {:label "and"
+                                                                                    :value "and"}
+                                                                                   {:label "or"
+                                                                                    :value "or"}])}))}
+                                {:description
+                                 ($ shr/FormControl {:title "Name"}
+                                    ($ shr/Input {:name "Name"
+                                                  :value (:name edited-query "")
+                                                  :onChange #(set-edited-query
+                                                              (fn [ep]
+                                                                (assoc ep :name (.-value (.-target %)))))}))}
+                                {:description ($ shr/FormControl {:title "Gender"
+                                                                  :className "gender-input"}
+                                                 ($ shr/Select {:name "Gender"
+                                                                :value (:gender edited-query "")
+                                                                :onChange #(set-edited-query
+                                                                            (fn [ep]
+                                                                              (assoc ep :gender (.-value (.-target %)))))
+                                                                :options (clj->js [{:label ""
+                                                                                    :value ""}
+                                                                                   {:label "Male"
+                                                                                    :value "Male"}
+                                                                                   {:label "Female"
+                                                                                    :value "Female"}])}))}
+                                {:description ($ shr/FormControl {:title "Date of Birth Range"}
+                                                 "from"
+
+                                                 ($ shr/DatePicker {:name "Date of Birth"
+                                                                    :value (:dob_start edited-query "")
+                                                                    :formatDate format-date
+                                                                    :onChangeDate #(set-edited-query
+                                                                                    (fn [ep]
+                                                                                      (assoc ep :dob_start %2)))})
+
+                                                 "to"
+                                                 ($ shr/DatePicker {:name "Date of Birth"
+                                                                    :value (:dob_end edited-query "")
+                                                                    :formatDate format-date
+                                                                    :onChangeDate #(set-edited-query
+                                                                                    (fn [ep]
+                                                                                      (assoc ep :dob_end %2)))}))}
+                                {:description ($ shr/FormControl {:title "Address"}
+                                                 ($ shr/Input {:name "Address"
+                                                               :value (:address edited-query "")
+                                                               :onChange #(set-edited-query
+                                                                           (fn [ep]
+                                                                             (assoc ep :address (.-value (.-target %)))))}))}
+                                {:description ($ shr/FormControl {:title "Phone number (xxx xxx xxxx)"}
+                                                 ($ shr/Input {:name "Phone"
+                                                               :defaultValue (:phone_number edited-query)
+                                                               :onChange #(set-edited-query
+                                                                           (fn [ep]
+                                                                             (assoc ep :phone_number (.-value (.-target %)))))}))}])})))))
 
 (defnc patient-form [{:keys [patient close update-patient add-patient submit-failure]}]
   (let [[edited-patient set-edited-patient] (hooks/use-state patient)]
@@ -134,7 +228,6 @@
                                        "Submit")
                          :onClickClose close}
        ($ shr/Center
-          (pr-str submit-failure)
           ($ shr/DefinitionList
              {:className "patient-form-container"
               :layout "single"
@@ -195,6 +288,7 @@
   [{:keys []}]
   (let [[filter-input set-filter-input] (hooks/use-state nil)
         [selected-patient set-selected-patient] (hooks/use-state nil)
+        [search-query set-search-query] (hooks/use-state nil)
         [submit-failure set-submit-failure] (hooks/use-state nil)
         {:keys [patients selected-patient-ids select-patient-id
                 toggle-select-all-patient-id
@@ -204,7 +298,8 @@
                 set-request-success
                 delete-patient
                 request-error
-                request-success]}
+                request-success
+                query-patients]}
         (use-patients)
         filtered-patients (if-not (empty? filter-input)
                             (->> patients
@@ -258,7 +353,14 @@
                                                                             :gender ""
                                                                             :phone_number ""
                                                                             :address ""}))}
-                   "New Patient"))))
+                   "New Patient"))
+              (when-not (or (seq selected-patient-ids)
+                            (seq filter-input))
+                ($ shr/Button {:variant "primary"
+                               :prefix ($ shr/FaSearchIcon)
+
+                               :onClick #(set-search-query (constantly {}))}
+                   "Advanced Query"))))
 
          (d/tr
           ($ shr/ThCheckbox {:id "check-all"
@@ -302,7 +404,10 @@
                                                           {:on-success #(set-selected-patient nil)
                                                            :on-failure #(set-submit-failure %)}))
                         :submit-failure submit-failure
-                        :close #(set-selected-patient nil)})))))
+                        :close #(set-selected-patient nil)}))
+     ($ search-form {:query search-query
+                     :submit-query query-patients
+                     :close #(set-search-query nil)}))))
 
 (defnc app []
   ($ shr/Stack
