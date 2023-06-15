@@ -18,14 +18,13 @@
                                                        [:> :date_of_birth (java.time.LocalDate/parse dob_start)]])
                         (and (not dob_start) dob_end) (conj [:< :date_of_birth (java.time.LocalDate/parse dob_end)])
                         (and dob_start (not dob_end)) (conj [:> :date_of_birth (java.time.LocalDate/parse dob_start)]))]
-    (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
-      (sql/query c
-                 (h.sql/format
-                  (cond-> (-> (h/select :*)
-                              (h/from :patients))
-                    (seq where-clauses) (h/where (into [(or (keyword filter_logic) :or)]
-                                                       where-clauses))))
-                 {:builder-fn next.jdbc.result-set/as-unqualified-maps}))))
+    (sql/query conn
+               (h.sql/format
+                (cond-> (-> (h/select :*)
+                            (h/from :patients))
+                  (seq where-clauses) (h/where (into [(or (keyword filter_logic) :or)]
+                                                     where-clauses))))
+               {:builder-fn next.jdbc.result-set/as-unqualified-maps})))
 
 (defn add-patient [conn patient]
   (sql/insert! conn :patients patient {:builder-fn next.jdbc.result-set/as-unqualified-maps}))

@@ -25,14 +25,15 @@
     (db/pool.stop ::pool) nil
     (jdbc/get-connection ::pool) conn-mock
 
-    (sql/query conn-mock ["select * from patients"]
+    (sql/query conn-mock ["SELECT * FROM patients"]
                {:builder-fn next.jdbc.result-set/as-unqualified-maps})
     [{:patient_id 1}]
 
     (sql/delete! conn-mock :patients {:patients/patient_id 1}) nil]
-   ((handler/pact-setup ::pool)
+   (is (nil?
+        ((handler/pact-setup ::pool)
 
-    {:body {:state "No patients exist"}})))
+         {:body {:state "No patients exist"}})))))
 
 (defn yada-body->json [b]
   (let [ba (byte-array (.remaining b))]
@@ -55,7 +56,7 @@
                   :phone_number "333 444 8888",
                   :date_of_birth "2000-10-11"}]
                 (-> (mfn/providing
-                     [(sql/query conn-mock ["select * from patients"]
+                     [(sql/query conn-mock ["SELECT * FROM patients"]
                                  {:builder-fn next.jdbc.result-set/as-unqualified-maps})
                       [{:name "Joel" :gender "Male" :address "200 ln"
                         :phone_number "333 444 8888" :date_of_birth "2000-10-11"}]]
