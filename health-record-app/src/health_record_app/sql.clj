@@ -2,10 +2,30 @@
   (:require [next.jdbc.sql :as sql]
             [next.jdbc :as jdbc]
             [next.jdbc.types :refer [as-other]]
-            [next.jdbc.date-time]))
+            [next.jdbc.date-time]
+            [honey.sql :as h.sql]
+            [honey.sql.helpers :as h]
+            [clojure.string :as str]))
 
-(defn patients [conn]
-  (sql/query conn ["select * from patients"] {:builder-fn next.jdbc.result-set/as-unqualified-maps}))
+(defn patients [conn {:strs [filter_logic name address phone_number gender dob_start dob_end]}]
+  (let [where-clauses (cond-> []
+                        name (conj [:like :name (str "%" (str/escape name {\% "\\%"}) "%")])
+                        address (conj [:like :address (str "%" (str/escape address {\% "\\%"}) "%")])
+                        phone_number (conj [:like :phone_number (str "%" (str/escape phone_number {\% "\\%"}) "%")])
+                        gender (conj [:= :gender (as-other gender)])
+                        (and dob_start dob_end) (conj [:and
+                                                       [:< :date_of_birth (java.time.LocalDate/parse dob_end)]
+                                                       [:> :date_of_birth (java.time.LocalDate/parse dob_start)]])
+                        (and (not dob_start) dob_end) (conj [:< :date_of_birth (java.time.LocalDate/parse dob_end)])
+                        (and dob_start (not dob_end)) (conj [:> :date_of_birth (java.time.LocalDate/parse dob_start)]))]
+    (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
+      (sql/query c
+                 (h.sql/format
+                  (cond-> (-> (h/select :*)
+                              (h/from :patients))
+                    (seq where-clauses) (h/where (into [(or (keyword filter_logic) :or)]
+                                                       where-clauses))))
+                 {:builder-fn next.jdbc.result-set/as-unqualified-maps}))))
 
 (defn add-patient [conn patient]
   (sql/insert! conn :patients patient {:builder-fn next.jdbc.result-set/as-unqualified-maps}))
@@ -17,6 +37,27 @@
   (sql/delete! conn :patients {:patients/patient_id id}))
 
 (comment
+  (str/escape "%%%" {\% "\\%"})
+  (let [where-clauses (cond-> []
+                        name (conj [:like :name (str "%" (str/escape name {\% "\\%"}) "%")])
+                        address (conj [:like :address (str "%" (str/escape address {\% "\\%"}) "%")])
+                        phone_number (conj [:like :phone_number (str "%" (str/escape phone_number {\% "\\%"}) "%")])
+                        gender (conj [:= :gender (as-other gender)])
+                        (and dob_start dob_end) (conj [:and
+                                                       [:< :date_of_birth (java.time.LocalDate/parse dob_end)]
+                                                       [:> :date_of_birth (java.time.LocalDate/parse dob_start)]])
+                        (and (not dob_start) dob_end) (conj [:< :date_of_birth (java.time.LocalDate/parse dob_end)])
+                        (and dob_start (not dob_end)) (conj [:> :date_of_birth (java.time.LocalDate/parse dob_start)]))]
+    (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
+      (sql/query c
+                 (h.sql/format
+                  (cond-> (-> (h/select :*)
+                              (h/from :patients))
+                    (seq where-clauses) (h/where (into [(or (keyword filter_logic) :or)]
+                                                       where-clauses)))))))
+
+
+
   (doseq [i (range 100)]
     (with-open [c (jdbc/get-connection (:db juxt.clip.repl/system))]
       (add-patient c {:name (str "person-" i)

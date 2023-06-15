@@ -47,7 +47,7 @@
 (defn patients [db]
   (fn patients [req]
     (with-open [c (jdbc/get-connection db)]
-      (sql/patients c))))
+      (sql/patients c (get-in req [:parameters :query] {})))))
 
 (defn- pact-setup-enabled? []
   (= "true"
@@ -61,5 +61,5 @@
       (when (and (= "No patients exist"
                     (get-in req [:body :state])))
         (with-open [c (jdbc/get-connection db)]
-          (doseq [{:keys [patient_id]} (sql/patients c)]
+          (doseq [{:keys [patient_id]} (sql/patients c {})]
             (sql/delete-patient c patient_id)))))))

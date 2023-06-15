@@ -32,8 +32,7 @@
     (sql/delete! conn-mock :patients {:patients/patient_id 1}) nil]
    ((handler/pact-setup ::pool)
 
-    {:body {:state "No patients exist"}}))
-  )
+    {:body {:state "No patients exist"}})))
 
 (defn yada-body->json [b]
   (let [ba (byte-array (.remaining b))]
@@ -161,3 +160,29 @@
                                                            :body (che/encode bad-patient-data)}))]
                   [(yada-body->json body)
                    status]))))))))
+
+#_(deftest query-tests
+    (mfn/providing
+     [(db/pool (matchers/any)) ::pool
+      (db/pool.stop ::pool) nil
+      (jdbc/get-connection ::pool) conn-mock]
+     (with-system [s (update (core/config) :components dissoc :server)]
+       (let [handler (as-handler (server/routes (:resources s)))]
+         (testing "GET /api/patients/ - db mocked"
+           (is (= [{:name "Joel",
+                    :gender "Male",
+                    :address "200 ln",
+                    :phone_number "333 444 8888",
+                    :date_of_birth "2000-10-11"}]
+                  (-> (mfn/providing
+                       [(sql/query conn-mock ["select * from patients"]
+                                   {:builder-fn next.jdbc.result-set/as-unqualified-maps})
+                        [{:name "Joel" :gender "Male" :address "200 ln"
+                          :phone_number "333 444 8888" :date_of_birth "2000-10-11"}]]
+                       @(handler {:request-method :get
+                                  :uri "/api/patients/"}))
+                      :body
+                      yada-body->json))))
+
+
+         ))))
