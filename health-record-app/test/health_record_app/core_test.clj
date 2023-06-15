@@ -162,28 +162,59 @@
                   [(yada-body->json body)
                    status]))))))))
 
-#_(deftest query-tests
-    (mfn/providing
-     [(db/pool (matchers/any)) ::pool
-      (db/pool.stop ::pool) nil
-      (jdbc/get-connection ::pool) conn-mock]
-     (with-system [s (update (core/config) :components dissoc :server)]
-       (let [handler (as-handler (server/routes (:resources s)))]
-         (testing "GET /api/patients/ - db mocked"
-           (is (= [{:name "Joel",
-                    :gender "Male",
-                    :address "200 ln",
-                    :phone_number "333 444 8888",
-                    :date_of_birth "2000-10-11"}]
-                  (-> (mfn/providing
-                       [(sql/query conn-mock ["select * from patients"]
-                                   {:builder-fn next.jdbc.result-set/as-unqualified-maps})
-                        [{:name "Joel" :gender "Male" :address "200 ln"
-                          :phone_number "333 444 8888" :date_of_birth "2000-10-11"}]]
-                       @(handler {:request-method :get
-                                  :uri "/api/patients/"}))
-                      :body
-                      yada-body->json))))
+(deftest query-tests
+  (mfn/providing
+   [(db/pool (matchers/any)) ::pool
+    (db/pool.stop ::pool) nil
+    (jdbc/get-connection ::pool) conn-mock]
+   (with-system [s (update (core/config) :components dissoc :server)]
+     (let [handler (as-handler (server/routes (:resources s)))]
+       (testing "GET /api/patients/ - using default OR logic"
+         (is (= [{:name "Joel",
+                  :gender "Male",
+                  :address "200 ln",
+                  :phone_number "333 444 8888",
+                  :date_of_birth "2000-10-11"}]
+                (-> (mfn/providing
+                     [(sql/query conn-mock
+                                 ["SELECT * FROM patients WHERE (name LIKE ?) OR (address LIKE ?) OR (phone_number LIKE ?) OR (gender = ?) OR ((date_of_birth < ?) AND (date_of_birth > ?))"
+                                  "%Joel%"
+                                  "%200%"
+                                  "%444%"
+                                  (health-record-app.sql/->sqlenum "Male")
+                                  (java.time.LocalDate/parse "2003-10-10")
+                                  (java.time.LocalDate/parse "1990-10-10")]
+                                 {:builder-fn next.jdbc.result-set/as-unqualified-maps})
+                      [{:name "Joel" :gender "Male" :address "200 ln"
+                        :phone_number "333 444 8888" :date_of_birth "2000-10-11"}]]
+                     @(handler {:request-method :get
+                                :uri "/api/patients/"
+                                :query-string "name=Joel&address=200&gender=Male&phone_number=444&dob_start=1990-10-10&dob_end=2003-10-10"}))
+                    :body
+                    yada-body->json))))
+       (testing "GET /api/patients/ - using AND logic"
+         (is (= [{:name "Joel",
+                  :gender "Male",
+                  :address "200 ln",
+                  :phone_number "333 444 8888",
+                  :date_of_birth "2000-10-11"}]
+                (-> (mfn/providing
+                     [(sql/query conn-mock
+                                 ["SELECT * FROM patients WHERE (name LIKE ?) AND (address LIKE ?) AND (phone_number LIKE ?) AND (gender = ?) AND ((date_of_birth < ?) AND (date_of_birth > ?))"
+                                  "%Joel%"
+                                  "%200%"
+                                  "%444%"
+                                  (health-record-app.sql/->sqlenum "Male")
+                                  (java.time.LocalDate/parse "2003-10-10")
+                                  (java.time.LocalDate/parse "1990-10-10")]
+                                 {:builder-fn next.jdbc.result-set/as-unqualified-maps})
+                      [{:name "Joel" :gender "Male" :address "200 ln"
+                        :phone_number "333 444 8888" :date_of_birth "2000-10-11"}]]
+                     @(handler {:request-method :get
+                                :uri "/api/patients/"
+                                :query-string "filter_logic=and&name=Joel&address=200&gender=Male&phone_number=444&dob_start=1990-10-10&dob_end=2003-10-10"}))
+                    :body
+                    yada-body->json))))
 
 
-         ))))
+       ))))

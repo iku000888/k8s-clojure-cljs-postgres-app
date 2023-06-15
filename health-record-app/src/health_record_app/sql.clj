@@ -7,12 +7,19 @@
             [honey.sql.helpers :as h]
             [clojure.string :as str]))
 
+;; The as-other values are not interned and equality breaks
+;; across every call making testing harder.
+;; Making it static allows re-use of the same instance and maintains equality
+(def ->sqlenum
+  {"Male" (next.jdbc.types/as-other "Male")
+   "Female" (next.jdbc.types/as-other "Female")})
+
 (defn patients [conn {:strs [filter_logic name address phone_number gender dob_start dob_end]}]
   (let [where-clauses (cond-> []
                         name (conj [:like :name (str "%" (str/escape name {\% "\\%"}) "%")])
                         address (conj [:like :address (str "%" (str/escape address {\% "\\%"}) "%")])
                         phone_number (conj [:like :phone_number (str "%" (str/escape phone_number {\% "\\%"}) "%")])
-                        gender (conj [:= :gender (as-other gender)])
+                        gender (conj [:= :gender (->sqlenum gender)])
                         (and dob_start dob_end) (conj [:and
                                                        [:< :date_of_birth (java.time.LocalDate/parse dob_end)]
                                                        [:> :date_of_birth (java.time.LocalDate/parse dob_start)]])
