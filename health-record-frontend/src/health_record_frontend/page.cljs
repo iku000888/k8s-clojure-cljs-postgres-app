@@ -52,28 +52,30 @@
      (when request-success
        (js/setTimeout (fn [] (set-request-success nil)) 6000)))
     {:patients patients
-     :add-patient (fn [patient]
+     :add-patient (fn [patient {:keys [on-success on-failure]}]
                     (POST "http://localhost:8080/api/patients/"
                           {:response-format :json
                            :format :json
                            :params patient
                            :keywords? true
-                           :error-handler #(set-request-error %)
+                           :error-handler on-failure
                            :handler (fn [response]
-                                      (set-request-success "Successfully added patient")
                                       (set-patients
                                        #(assoc %
                                                (:patient_id response)
-                                               response)))}))
-     :update-patient (fn [id patient]
+                                               response))
+                                      (on-success)
+                                      (set-request-success "Successfully added patient"))}))
+     :update-patient (fn [id patient {:keys [on-success on-failure]}]
                        (PUT (str "http://localhost:8080/api/patients/" id)
                             {:response-format :json
                              :format :json
                              :params patient
                              :keywords? true
-                             :error-handler #(set-request-error %)
+                             :error-handler on-failure
                              :handler (fn [_response]
                                         (set-request-success "Successfully updated patient")
+                                        (on-success)
                                         (set-patients
                                          #(assoc % id patient)))}))
      :delete-patient (fn [id]
@@ -113,7 +115,7 @@
       (not (empty? (re-matches #"\(?([2-9][0-8][0-9])\)?[-. ]?([2-9][0-9]{2})[-. ]?([0-9]{4})"
                                phone)))))
 
-(defnc patient-form [{:keys [patient close update-patient add-patient]}]
+(defnc patient-form [{:keys [patient close update-patient add-patient submit-failure]}]
   (let [[edited-patient set-edited-patient] (hooks/use-state patient)]
     ($ shr/ActionDialog {:title (if (:patient_id patient)
                                   "Update Patient"
@@ -132,11 +134,13 @@
                                        "Submit")
                          :onClickClose close}
        ($ shr/Center
+          (pr-str submit-failure)
           ($ shr/DefinitionList
              {:className "patient-form-container"
               :layout "single"
               :items (clj->js  [{:description
-                                 ($ shr/FormControl {:title "Name"}
+                                 ($ shr/FormControl {:title "Name"
+                                                     :errorMessages (get-in submit-failure [:response :name])}
                                     ($ shr/Input {:id "patient-form-name"
                                                   :name "Name"
                                                   :error (empty? (:name edited-patient))
@@ -144,7 +148,8 @@
                                                   :onChange #(set-edited-patient
                                                               (fn [ep]
                                                                 (assoc ep :name (.-value (.-target %)))))}))}
-                                {:description ($ shr/FormControl {:title "Gender"}
+                                {:description ($ shr/FormControl {:title "Gender"
+                                                                  :errorMessages (get-in submit-failure [:response :gender])}
                                                  ($ shr/Select {:id "patient-form-gender"
                                                                 :error (empty? (:gender edited-patient))
                                                                 :value (:gender edited-patient "")
@@ -157,20 +162,23 @@
                                                                                     :value "Male"}
                                                                                    {:label "Female"
                                                                                     :value "Female"}])}))}
-                                {:description ($ shr/FormControl {:title "Date of Birth"}
+                                {:description ($ shr/FormControl {:title "Date of Birth"
+                                                                  :errorMessages (get-in submit-failure [:response :date_of_birth])}
                                                  ($ shr/DatePicker {:id "patient-form-dob"
                                                                     :value (:date_of_birth edited-patient "")
                                                                     :formatDate format-date
                                                                     :onChangeDate #(set-edited-patient
                                                                                     (fn [ep]
                                                                                       (assoc ep :date_of_birth %2)))}))}
-                                {:description ($ shr/FormControl {:title "Address"}
+                                {:description ($ shr/FormControl {:title "Address"
+                                                                  :errorMessages (get-in submit-failure [:response :address])}
                                                  ($ shr/Input {:id "patient-form-address"
                                                                :value (:address edited-patient "")
                                                                :onChange #(set-edited-patient
                                                                            (fn [ep]
                                                                              (assoc ep :address (.-value (.-target %)))))}))}
-                                {:description ($ shr/FormControl {:title "Phone number (xxx xxx xxxx)"}
+                                {:description ($ shr/FormControl {:title "Phone number (xxx xxx xxxx)"
+                                                                  :errorMessages (get-in submit-failure [:response :phone_number])}
                                                  ($ shr/Input {:id "patient-form-phone"
                                                                :error (not (valid-phone-number? (:phone_number edited-patient)))
                                                                :defaultValue (:phone_number edited-patient)
@@ -182,6 +190,7 @@
   [{:keys []}]
   (let [[filter-input set-filter-input] (hooks/use-state nil)
         [selected-patient set-selected-patient] (hooks/use-state nil)
+        [submit-failure set-submit-failure] (hooks/use-state nil)
         {:keys [patients selected-patient-ids select-patient-id
                 toggle-select-all-patient-id
                 update-patient
@@ -280,11 +289,14 @@
      (when selected-patient
        ($ patient-form {:patient selected-patient
                         :add-patient (fn [patient]
-                                       (add-patient patient)
-                                       (set-selected-patient nil))
+                                       (add-patient patient
+                                                    {:on-success #(set-selected-patient nil)
+                                                     :on-failure #(set-submit-failure %)}))
                         :update-patient (fn [id patient]
-                                          (update-patient id patient)
-                                          (set-selected-patient nil))
+                                          (update-patient id patient
+                                                          {:on-success #(set-selected-patient nil)
+                                                           :on-failure #(set-submit-failure %)}))
+                        :submit-failure submit-failure
                         :close #(set-selected-patient nil)})))))
 
 (defnc app []

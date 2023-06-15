@@ -11,8 +11,6 @@
 
 (def Patient
   [:map
-   [:patient_id {:optional true}
-    string?]
    [:name string?]
    [:date_of_birth
     [:fn {:error/message "Date format is yyyy-MM-dd"}
