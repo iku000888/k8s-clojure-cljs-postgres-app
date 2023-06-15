@@ -149,8 +149,10 @@
                                                               (fn [ep]
                                                                 (assoc ep :name (.-value (.-target %)))))}))}
                                 {:description ($ shr/FormControl {:title "Gender"
+                                                                  :className "gender-input"
                                                                   :errorMessages (get-in submit-failure [:response :gender])}
                                                  ($ shr/Select {:id "patient-form-gender"
+                                                                :name "Gender"
                                                                 :error (empty? (:gender edited-patient))
                                                                 :value (:gender edited-patient "")
                                                                 :onChange #(set-edited-patient
@@ -165,6 +167,7 @@
                                 {:description ($ shr/FormControl {:title "Date of Birth"
                                                                   :errorMessages (get-in submit-failure [:response :date_of_birth])}
                                                  ($ shr/DatePicker {:id "patient-form-dob"
+                                                                    :name "Date of Birth"
                                                                     :value (:date_of_birth edited-patient "")
                                                                     :formatDate format-date
                                                                     :onChangeDate #(set-edited-patient
@@ -173,6 +176,7 @@
                                 {:description ($ shr/FormControl {:title "Address"
                                                                   :errorMessages (get-in submit-failure [:response :address])}
                                                  ($ shr/Input {:id "patient-form-address"
+                                                               :name "Address"
                                                                :value (:address edited-patient "")
                                                                :onChange #(set-edited-patient
                                                                            (fn [ep]
@@ -180,6 +184,7 @@
                                 {:description ($ shr/FormControl {:title "Phone number (xxx xxx xxxx)"
                                                                   :errorMessages (get-in submit-failure [:response :phone_number])}
                                                  ($ shr/Input {:id "patient-form-phone"
+                                                               :name "Phone"
                                                                :error (not (valid-phone-number? (:phone_number edited-patient)))
                                                                :defaultValue (:phone_number edited-patient)
                                                                :onChange #(set-edited-patient
