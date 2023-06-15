@@ -1,6 +1,9 @@
 (ns health-record-app.handler
   (:require [health-record-app.sql :as sql]
-            [next.jdbc :as jdbc]))
+            [health-record-app.schema :as schema]
+            [next.jdbc :as jdbc]
+            [malli.core :as m]
+            [malli.error :as me]))
 
 ;; The as-other values are not interned and equality breaks
 ;; across every call making testing harder.
@@ -16,15 +19,25 @@
 
 (defn patients.add [db]
   (fn add-patient [req]
-    (with-open [c (jdbc/get-connection db)]
-      (sql/add-patient c (->sql-patient (:body req))))))
+    (if-let [explanation (m/explain schema/PatientSchema
+                                    (:body req))]
+      (throw (ex-info "Validation failure"
+                      {:http/status 400
+                       :body (me/humanize explanation)}))
+      (with-open [c (jdbc/get-connection db)]
+        (sql/add-patient c (->sql-patient (:body req)))))))
 
 (defn patients.update [db]
   (fn update-patient [req]
-    (with-open [c (jdbc/get-connection db)]
-      (sql/update-patient c
-                          (:patient-id (:route-params req))
-                          (->sql-patient (:body req))))))
+    (if-let [explanation (m/explain schema/PatientSchema
+                                    (:body req))]
+      (throw (ex-info "Validation failure"
+                      {:http/status 400
+                       :body (me/humanize explanation)}))
+      (with-open [c (jdbc/get-connection db)]
+        (sql/update-patient c
+                            (:patient-id (:route-params req))
+                            (->sql-patient (:body req)))))))
 
 (defn patient.delete [db]
   (fn delete-patient [req]

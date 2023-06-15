@@ -120,3 +120,44 @@
                                 :uri "/api/patients/1"}))
                     :body
                     yada-body->json))))))))
+
+(deftest validation-tests
+  (mfn/providing
+   [(db/pool (matchers/any)) ::pool
+    (db/pool.stop ::pool) nil
+    (jdbc/get-connection ::pool) conn-mock]
+   (with-system [s (update (core/config) :components dissoc :server)]
+     (let [handler (as-handler (server/routes (:resources s)))
+           bad-patient-data {:name nil
+                             :gender "MMale",
+                             :address nil
+                             :phone_number "ggg 444 8888",
+                             :date_of_birth "200B-10-11"}]
+       (testing "POST /api/patients/ - db mocked"
+         (is (= [{:name ["should be a string"],
+                  :date_of_birth ["Date format is yyyy-MM-dd"],
+                  :gender ["should be either Male or Female"],
+                  :address ["should be a string"],
+                  :phone_number ["Invalid phone number format"]}
+                 400]
+                (let [{:keys [body status]} @(handler {:headers {"content-type" "application/json"
+                                                                 "content-length" "65"}
+                                                       :request-method :post
+                                                       :uri "/api/patients/"
+                                                       :body (che/encode bad-patient-data)})]
+                  [(yada-body->json body)
+                   status]))))
+       (testing "PUT /api/patients/1 - db mocked"
+         (is (= [{:name ["should be a string"],
+                  :date_of_birth ["Date format is yyyy-MM-dd"],
+                  :gender ["should be either Male or Female"],
+                  :address ["should be a string"],
+                  :phone_number ["Invalid phone number format"]}
+                 400]
+                (let [{:keys [body status]} (-> @(handler {:headers {"content-type" "application/json"
+                                                                     "content-length" "65"}
+                                                           :request-method :put
+                                                           :uri "/api/patients/1"
+                                                           :body (che/encode bad-patient-data)}))]
+                  [(yada-body->json body)
+                   status]))))))))

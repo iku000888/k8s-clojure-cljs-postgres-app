@@ -40,10 +40,18 @@
                        yada.interceptors/return]
    :error-interceptor-chain [yada.security/access-control-headers
                              (fn [ctx]
-                               (log/error (:error ctx)
-                                          ctx
-                                          "Uncaught error")
-                               (update ctx :response assoc :body {:message "Internal Error"}))
+                               (if (= 400 (:http/status (ex-data (:error ctx))))
+                                 (do
+                                   (log/warn (:error ctx))
+                                   (update ctx :response
+                                           assoc
+                                           :body (:body (ex-data (:error ctx)))
+                                           :status 400))
+                                 (do
+                                   (log/error (:error ctx)
+                                              ctx
+                                              "Uncaught error")
+                                   (update ctx :response assoc :body {:message "Internal Error"}))))
 
                              yada.interceptors/create-response
                              yada.interceptors/return]))

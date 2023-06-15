@@ -20,7 +20,9 @@
 
                  [com.github.seancorfield/next.jdbc "1.3.874"]
                  [com.zaxxer/HikariCP "3.3.1"]
-                 [org.postgresql/postgresql "42.2.10"]]
+                 [org.postgresql/postgresql "42.2.10"]
+
+                 [metosin/malli "0.11.0"]]
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]
                                   [nubank/mockfn "0.7.0"]]
